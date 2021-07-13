@@ -33,11 +33,11 @@ class TUserOwnerRuleTest extends PHPUnit\Framework\TestCase
 		self::assertEquals(0, $this->obj->isUserAllowed($user, 'get', '192.168.0.10', null));
 		self::assertEquals(1, $this->obj->isUserAllowed($user, 'get', '192.168.0.10', ['username' => 'admin1']));
 		
-		$this->obj->setAction('deny');
+		
+		$this->obj = new TUserOwnerRule('deny');
 		self::assertEquals(-1, $this->obj->isUserAllowed($user, 'get', '192.168.0.10', ['username' => 'Admin1']));
 		
-		$this->obj->setAction('allow');
-		$this->obj->setRoles('Developer');
+		$this->obj = new TUserOwnerRule('allow', '', 'Developer');
 		self::assertEquals(0, $this->obj->isUserAllowed($user, 'get', '192.168.0.10', ['username' => 'admin1']));
 		
 		$user->setRoles('Developer');

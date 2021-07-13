@@ -27,20 +27,6 @@ use Prado\Security\TAuthorizationRule;
 class TUserOwnerRule extends TAuthorizationRule
 {
 	/**
-	 * Constructor.
-	 * @param string $action action, either 'deny' or 'allow'
-	 * @param string $users a comma separated user list
-	 * @param string $roles a comma separated role list
-	 * @param string $verb verb, can be empty, 'get', or 'post'
-	 * @param string $ipRules IP rules (separated by comma, can contain wild card *)
-	 * @param null|mixed $priority
-	 */
-	public function __construct($priority = '')
-	{
-		parent::__construct('allow', '*', '*', '*', '*', $priority);
-	}
-
-	/**
 	 * @param \Prado\Security\IUser $user the user object
 	 * @param string $verb the request verb (GET, PUT)
 	 * @param string $ip the request IP address

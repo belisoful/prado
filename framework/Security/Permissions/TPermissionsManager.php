@@ -366,12 +366,15 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 				if (!$name) {
 					throw new TConfigurationException('permissions_rules_require_name');
 				}
-				if (!($properties['action'] ?? null)) {
-					throw new TConfigurationException('permissions_rules_require_action');
-				}
-				unset($properties['name']);
-				$properties['class'] = $properties['class'] ?? 'Prado\\Security\\TAuthorizationRule';
-				$rule = Prado::createComponent($properties);
+				$class = $properties['class'] ?? 'Prado\\Security\\TAuthorizationRule';
+				$action = $properties['action'] ?? '';
+				$users = $properties['users'] ?? '';
+				$roles = $properties['roles'] ?? '';
+				$verb = $properties['verb'] ?? '';
+				$ips = $properties['ips'] ?? '';
+				$priority = $properties['priority'] ?? '';
+				
+				$rule = new $class($action, $users, $roles, $verb, $ips, $priority);
 			} else {
 				$rule = $properties;
 			}
