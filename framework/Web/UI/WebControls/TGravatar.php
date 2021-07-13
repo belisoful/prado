@@ -24,7 +24,7 @@ use Prado\Exceptions\TInvalidDataValueException;
  *		• identicon - identicon style
  *		• monsterid - monster style
  *		• wavatar - wavatar style
- *		• retro - Retra style
+ *		• retro - Retro style
  *		• robohash - Robohash style
  *		• blank - a blank space
  *		• 404 - not found page error
