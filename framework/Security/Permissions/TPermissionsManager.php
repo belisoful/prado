@@ -264,7 +264,7 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	 * Registers an object's permissions
 	 * @param string $permissionName name of the permission
 	 * @param string $description description of the permission
-	 * @param null|\Prado\Security\TAuthorizationRule[] $rules 
+	 * @param null|\Prado\Security\TAuthorizationRule[] $rules
 	 */
 	public function registerPermission($permissionName, $description, $rules = null)
 	{
