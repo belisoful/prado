@@ -38,12 +38,13 @@ class TPermissionEventTest extends PHPUnit\Framework\TestCase
 	public function testConstruct()
 	{
 		$name = 'Perm_Name';
-		$component = new stdClass();
+		$description = 'description of permission';
 		$events = ['dyPermissionNameAllowed'];
 		$rules = [new TAuthorizationRule()];
-		$perm = new TPermissionEvent($name, $events, $rules);
+		$perm = new TPermissionEvent($name, $description, $events, $rules);
 		
 		self::assertEquals(strtolower($name), $perm->getName());
+		self::assertEquals($description, $perm->getDescription());
 		self::assertEquals(array_map('strtolower', $events), $perm->getEvents());
 		self::assertEquals($rules, $perm->getRules());
 	}
@@ -60,6 +61,20 @@ class TPermissionEventTest extends PHPUnit\Framework\TestCase
 		
 		$perm->setName($v = 'test_perm');
 		self::assertEquals($v, $perm->getName());
+	}
+	
+	public function testDescription()
+	{
+		$perm = new TPermissionEvent();
+		
+		$perm->setDescription(null);
+		self::assertEquals('', $perm->getDescription());
+		
+		$perm->setDescription($v = '');
+		self::assertEquals($v, $perm->getDescription());
+		
+		$perm->setDescription($v = 'test_perm');
+		self::assertEquals($v, $perm->getDescription());
 	}
 	
 	public function testEvents()

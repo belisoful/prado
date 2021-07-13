@@ -63,7 +63,7 @@ class TPermissionsBehavior extends TBehavior implements IDynamicMethods
 				foreach ($permEvent->getEvents() as $event) {
 					$this->_permissionEvents[$event][] = $perm;
 				}
-				$this->getManager()->registerPermission($perm, $permEvent->getRules());
+				$this->getManager()->registerPermission($perm, $permEvent->getDescription(), $permEvent->getRules());
 			}
 		}
 	}

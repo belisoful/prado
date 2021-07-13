@@ -92,6 +92,7 @@ class TCronModule extends \Prado\TModule implements IPermissions
 	/** The separator for TCronMethodTask */
 	public const METHOD_SEPARATOR = '->';
 	
+	/** The permission for the cron shell */
 	public const PERM_CRON_SHELL = 'cron_shell';
 	
 	/** @var bool if the module has been initialized */
@@ -172,13 +173,13 @@ class TCronModule extends \Prado\TModule implements IPermissions
 	}
 	
 	/**
-	 * @param mixed $manager
-	 * @return array<Prado\Security\TPermissionRule>
+	 * @param \Prado\Security\Permissions\TPermissionsManager $manager
+	 * @return \Prado\Security\Permissions\TPermissionEvent[]
 	 */
 	public function getPermissions($manager)
 	{
 		return [
-			new TPermissionEvent(static::PERM_CRON_SHELL, 'dyRegisterShellAction')
+			new TPermissionEvent(static::PERM_CRON_SHELL, 'Activates cron shell commands.', 'dyRegisterShellAction')
 		];
 	}
 	
@@ -240,6 +241,10 @@ class TCronModule extends \Prado\TModule implements IPermissions
 		}
 	}
 	
+	/**
+	 * @param object $sender sender of this event handler
+	 * @param null|mixed $param parameter for the event
+	 */
 	public function registerShellAction($sender, $param)
 	{
 		if ($this->dyRegisterShellAction(false) && ($app = Prado::getApplication())->isa('Prado\\Shell\\TShellApplication')) {

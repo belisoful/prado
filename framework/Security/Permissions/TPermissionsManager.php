@@ -159,6 +159,9 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	/** @var \Prado\Security\TAuthorizationRuleCollection[] contains the rules for each permission */
 	private $_permissionRules = [];
 	
+	/** @var array<string, string> contains the short descriptions for each permission */
+	private $_descriptions = [];
+	
 	/** @var string permission descriptions */
 	private $_permissionDescriptions = []; //TODO
 	
@@ -198,14 +201,14 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	// hierarchy from parameter
 	
 	/**
-	 * @param mixed $manager
-	 * @return TPermissionEvent the dynamic events to have the authorization
+	 * @param \Prado\Security\Permissions\TPermissionsManager $manager
+	 * @return TPermissionEvent[] the dynamic events to have authorization
 	 */
 	public function getPermissions($manager)
 	{
 		return [
-			new TPermissionEvent(static::PERM_PERMISSIONS_MANAGE_ROLES, ['dyAddRoleChildren', 'dyRemoveRoleChildren']),
-			new TPermissionEvent(static::PERM_PERMISSIONS_MANAGE_PERMISSION_RULES, ['dyAddPermissionRule', 'dyRemovePermissionRule'])
+			new TPermissionEvent(static::PERM_PERMISSIONS_MANAGE_ROLES, 'Manages Db Permissions Role Children.', ['dyAddRoleChildren', 'dyRemoveRoleChildren']),
+			new TPermissionEvent(static::PERM_PERMISSIONS_MANAGE_PERMISSION_RULES, 'Manages Db Permissions Rules.', ['dyAddPermissionRule', 'dyRemovePermissionRule'])
 		];
 	}
 	
@@ -259,12 +262,14 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	
 	/**
 	 * Registers an object's permissions
-	 * @param string $permission
-	 * @param null|\Prado\ $rules
+	 * @param string $permissionName name of the permission
+	 * @param string $description description of the permission
+	 * @param null|\Prado\Security\TAuthorizationRule[] $rules 
 	 */
-	public function registerPermission($permission, $rules = null)
+	public function registerPermission($permissionName, $description, $rules = null)
 	{
-		$permission = strtolower($permission);
+		$permission = strtolower($permissionName);
+		$this->_descriptions[$permission] = TPropertyValue::ensureString($description);
 		
 		if ($this->_autoDenyAll === true) {
 			$this->_autoDenyAll = 2;
@@ -298,6 +303,15 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 				}
 			}
 		}
+	}
+	/**
+	 * gets the short description of the permission
+	 * @param string $permissionName name of the permission
+	 * @return string short description of the permission
+	 */
+	public function getPermissionDescription($permissionName)
+	{
+		return $this->_descriptions[strtolower($permissionName)];
 	}
 	
 	/**

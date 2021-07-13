@@ -397,17 +397,4 @@ class TDbParameterModuleTest extends PHPUnit\Framework\TestCase
 		$this->obj->setCaptureParameterChanges('true');
 		self::assertTrue($this->obj->getCaptureParameterChanges());
 	}
-	
-
-	public function testShellAccess()
-	{
-		$this->obj->setShellAccess(false);
-		self::assertFalse($this->obj->getShellAccess());
-		$this->obj->setShellAccess(true);
-		self::assertTrue($this->obj->getShellAccess());
-		$this->obj->setShellAccess('false');
-		self::assertFalse($this->obj->getShellAccess());
-		$this->obj->setShellAccess('true');
-		self::assertTrue($this->obj->getShellAccess());
-	}
 }

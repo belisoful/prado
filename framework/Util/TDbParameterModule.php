@@ -19,6 +19,8 @@ use Prado\Exceptions\TInvalidDataTypeException;
 use Prado\Exceptions\TInvalidOperationException;
 use Prado\TModule;
 use Prado\TPropertyValue;
+use Prado\Security\Permissions\IPermissions;
+use Prado\Security\Permissions\TPermissionEvent;
 use Prado\Util\Behaviors\TMapLazyLoadBehavior;
 use Prado\Util\Behaviors\TMapRouteBehavior;
 
@@ -62,11 +64,15 @@ use Prado\Util\Behaviors\TMapRouteBehavior;
  * @package Prado\Util
  * @since 4.2.0
  */
-class TDbParameterModule extends TModule implements IDbModule
+class TDbParameterModule extends TModule implements IDbModule, IPermissions
 {
 	public const SERIALIZE_PHP = 'php';
 	
 	public const SERIALIZE_JSON = 'json';
+	
+	/** The permission for the cron shell */
+	public const PERM_PARAM_SHELL = 'param_shell';
+	
 	/**
 	 * The name of the Application Parameter Lazy Load Behavior
 	 */
@@ -164,10 +170,20 @@ class TDbParameterModule extends TModule implements IDbModule
 		if ($this->_autoCapture) {
 			$this->getApplication()->attachEventHandler('onBeginRequest', [$this, 'attachTPageServiceHandler']);
 		}
-		if ($this->_shellAccess && ($app = $this->getApplication())->isa('Prado\\Shell\\TShellApplication')) {
-			$app->addShellActionClass('Prado\\Shell\\Actions\\TDbParameterAction');
-		}
+		$app = $this->getApplication();
+		$app->attachEventHandler('onAuthenticationComplete', [$this, 'registerShellAction']);
 		parent::init($config);
+	}
+	
+	/**
+	 * @param \Prado\Security\Permissions\TPermissionsManager $manager
+	 * @return \Prado\Security\Permissions\TPermissionEvent[]
+	 */
+	public function getPermissions($manager)
+	{
+		return [
+			new TPermissionEvent(static::PERM_PARAM_SHELL, 'Activates parameter shell commands.', 'dyRegisterShellAction')
+		];
 	}
 	
 	/**
@@ -219,6 +235,17 @@ class TDbParameterModule extends TModule implements IDbModule
 		$service = $this->getService();
 		if ($service->hasEvent('onPreRunPage')) {
 			$service->attachEventHandler('onPreRunPage', [$this, 'attachParameterStorage'], 0);
+		}
+	}
+	
+	/**
+	 * @param object $sender sender of this event handler
+	 * @param null|mixed $param parameter for the event
+	 */
+	public function registerShellAction($sender, $param)
+	{
+		if ($this->dyRegisterShellAction(false) && ($app = Prado::getApplication())->isa('Prado\\Shell\\TShellApplication')) {
+			$app->addShellActionClass('Prado\\Shell\\Actions\\TDbParameterAction');
 		}
 	}
 	
@@ -701,21 +728,5 @@ class TDbParameterModule extends TModule implements IDbModule
 	public function setCaptureParameterChanges($value)
 	{
 		$this->_autoCapture = TPropertyValue::ensureBoolean($value);
-	}
-
-	/**
-	 * @return bool should the DbParameter module have shell access. Defaults to false.
-	 */
-	public function getShellAccess()
-	{
-		return $this->_shellAccess;
-	}
-
-	/**
-	 * @param bool $value should the DbParameter module have shell access.
-	 */
-	public function setShellAccess($value)
-	{
-		$this->_shellAccess = TPropertyValue::ensureBoolean($value);
 	}
 }

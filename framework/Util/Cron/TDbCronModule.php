@@ -130,18 +130,18 @@ class TDbCronModule extends TCronModule implements \Prado\Util\IDbModule
 	}
 	
 	/**
-	 * @param mixed $manager
-	 * @return Prado\Security\Permissions\TPermissionEvent[]
+	 * @param \Prado\Security\Permissions\TPermissionsManager $manager
+	 * @return \Prado\Security\Permissions\TPermissionEvent[]
 	 */
 	public function getPermissions($manager)
 	{
 		$userIsOwnerAllowedRule = new TUserOwnerRule();
 		return array_merge([
-			new TPermissionEvent(static::PERM_CRON_LOG_READ, ['dyGetCronLog', 'dyGetCronLogCount']),
-			new TPermissionEvent(static::PERM_CRON_LOG_DELETE, ['dyClearCronLog', 'dyRemoveCronLogItem']),
-			new TPermissionEvent(static::PERM_CRON_ADD_TASK, ['dyAddTask']),
-			new TPermissionEvent(static::PERM_CRON_UPDATE_TASK, ['dyUpdateTask'], $userIsOwnerAllowedRule),
-			new TPermissionEvent(static::PERM_CRON_REMOVE_TASK, ['dyRemoveTask'], $userIsOwnerAllowedRule)
+			new TPermissionEvent(static::PERM_CRON_LOG_READ, 'Cron read Db log.', ['dyGetCronLog', 'dyGetCronLogCount']),
+			new TPermissionEvent(static::PERM_CRON_LOG_DELETE, 'Cron delete Db log.', ['dyClearCronLog', 'dyRemoveCronLogItem']),
+			new TPermissionEvent(static::PERM_CRON_ADD_TASK, 'Cron add Db Task.', ['dyAddTask']),
+			new TPermissionEvent(static::PERM_CRON_UPDATE_TASK, 'Cron update Db task.', ['dyUpdateTask'], $userIsOwnerAllowedRule),
+			new TPermissionEvent(static::PERM_CRON_REMOVE_TASK, 'Cron remove Db task.', ['dyRemoveTask'], $userIsOwnerAllowedRule)
 		], parent::getPermissions($manager));
 	}
 	
