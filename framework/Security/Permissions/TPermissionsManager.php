@@ -158,25 +158,22 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	/** @var string[] Default roles to give all users, default [] */
 	private $_defaultRoles;
 	
-	/** @var \Prado\Security\TAuthorizationRuleCollection[] contains the rules for each permission */
+	/** @var array<string, \Prado\Security\TAuthorizationRuleCollection> contains the rules for each permission */
 	private $_permissionRules = [];
 	
 	/** @var array<string, string> contains the short descriptions for each permission */
 	private $_descriptions = [];
 	
-	/** @var string permission descriptions */
-	private $_permissionDescriptions = []; //TODO
-	
-	/** @var array<string, \Prado\Security\TAuthorizationRule[]>  */
+	/** @var array<string, \Prado\Security\TAuthorizationRule[]> the rules to apply to newly registered Permissions */
 	private $_autoRules = [];
 	
-	/** @var bool contains the hierarchy of roles-permissions */
+	/** @var array<string, string[]> contains the hierarchy of roles and children roles/permissions */
 	private $_hierarchy = [];
 	
 	/** @var bool is the module initialized */
 	private $_initialized = false;
 	
-	/** @var string user/role information file */
+	/** @var string role hierarchy and permission rules information file */
 	private $_permissionFile;
 	
 	/** @var numeric the priority of the Allow With Permission Rule, default 5 */
@@ -188,13 +185,13 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	/** @var bool add module rules, allows User's data, default true */
 	private $_autoRulePresetRules = true;
 	
-	/** @var bool add Deny All rule to every permissions as the last rule */
+	/** @var bool add Deny All rule to every permissions as the last rule, default true */
 	private $_autoDenyAll = true;
 	
-	/** @var numeric the priority of the module Rule, usually these are Allow User As Owner */
-	private $_autoDenyAllPriority = 999999;
+	/** @var numeric the priority of the module Rule, usually these are Allow User As Owner, default 1000000 */
+	private $_autoDenyAllPriority = 1000000;
 	
-	/** @var numeric the priority of the module Rule, usually these are Allow User As Owner */
+	/** @var \Prado\Util\TDbParameterModule the database module providing runtime roles and rules */
 	private $_dbParameter;
 	
 	/** @var numeric the priority of the module Rule, usually these are Allow User As Owner */
@@ -263,7 +260,7 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	}
 	
 	/**
-	 * Registers an object's permissions
+	 * Registers a permission name with description and preset rules.
 	 * @param string $permissionName name of the permission
 	 * @param string $description description of the permission
 	 * @param null|\Prado\Security\TAuthorizationRule[] $rules
@@ -306,6 +303,7 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 			}
 		}
 	}
+	
 	/**
 	 * gets the short description of the permission
 	 * @param string $permissionName name of the permission
@@ -317,6 +315,7 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	}
 	
 	/**
+	 * Loads the roles, children, and permission rules.
 	 * @param array|Prado\Xml\TXMLElement configurations to parse
 	 * @param mixed $config
 	 */
@@ -385,9 +384,10 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	}
 	
 	/**
-	 *
-	 * @param string $name
-	 * @param \Prado\Security\TAuthorizationRule $rule
+	 * Adds a permission rule to a permission name. Names can contain the '*' character
+	 * and every permission with a matching name before the '*' will get the rule
+	 * @param string $name Permission name
+	 * @param \Prado\Security\TAuthorizationRule|\Prado\Security\TAuthorizationRule[] $rule
 	 */
 	protected function addPermissionRuleInternal($name, $rule)
 	{
@@ -426,7 +426,7 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	}
 	
 	/**
-	 *
+	 * Removes a permission rule from a permission name.
 	 * @param string $name
 	 * @param \Prado\Security\TAuthorizationRule $rule
 	 */
@@ -464,7 +464,7 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	 * checks if the $permission is in the $roles hierarchy.
 	 * @param string[] $roles the roles to check the permission
 	 * @param string $permission the permission-role being checked for in the hierarchy
-	 * @param &array<string, bool> $checked the rolls already checked
+	 * @param &array<string, bool> $checked the roles already checked
 	 */
 	public function isInHierarchy($roles, $permission, &$checked = [])
 	{
@@ -493,7 +493,8 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	}
 	
 	/**
-	 * @return array the db configuration
+	 * Get the roles that are runtime from the database
+	 * @return array<string, string[]> roles and children from the database
 	 */
 	public function getDbConfigRoles()
 	{
@@ -502,8 +503,8 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	}
 	
 	/**
-	 * @param string[] $children the children to add to the role
-	 * @return array the db configuration
+	 * Get the permission rules that are runtime from the database
+	 * @return array<string, \Prado\Security\TAuthorizationRule[]>
 	 */
 	public function getDbConfigPermissionRules()
 	{
@@ -512,8 +513,12 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	}
 	
 	/**
+	 * This adds children to a role within the runtime context.  The children
+	 * can be a single comma separated string.
 	 * @param string $role the role to add children
-	 * @param string[] $children the children to add to the role
+	 * @param string|string[] $children the children to add to the role
+	 * @throws TInvalidDataValueException when children is not an array
+	 * @return bool was the method successful
 	 */
 	public function addRoleChildren($role, $children)
 	{
@@ -523,7 +528,7 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 		if (is_string($children)) {
 			$children = array_map('trim', explode(',', $children));
 		} elseif (!is_array($children)) {
-			throw new TInvalidDataValueException('permission_add_children_invalid', $children);
+			throw new TInvalidDataValueException('permission_children_invalid', $children);
 		}
 		$role = strtolower($role);
 		$children = array_map('strtolower', array_filter($children));
@@ -538,9 +543,12 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	}
 	
 	/**
-	 * @param string $role the role to return its .children
-	 * @param mixed $children
-	 * @return string[] the children of a specific role.
+	 * This removes children from a role within the runtime context.  The children
+	 * can be a single comma separated string.
+	 * @param string $role the role to add children
+	 * @param string|string[] $children the children to add to the role
+	 * @throws TInvalidDataValueException when children is not an array
+	 * @return bool was the method successful
 	 */
 	public function removeRoleChildren($role, $children)
 	{
@@ -550,7 +558,7 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 		if (is_string($children)) {
 			$children = array_map('trim', explode(',', $children));
 		} elseif (!is_array($children)) {
-			throw new TInvalidDataValueException('permission_remove_children_invalid', $children);
+			throw new TInvalidDataValueException('permission_children_invalid', $children);
 		}
 		$role = strtolower($role);
 		$children = array_map('strtolower', array_filter($children));
@@ -569,8 +577,10 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	}
 	
 	/**
+	 * This method adds permission rules with in the runtime context.
 	 * @param string $permission
 	 * @param \Prado\Security\TAuthorizationRule $rule
+	 * @return bool was the method successful
 	 */
 	public function addPermissionRule($permission, $rule)
 	{
@@ -590,9 +600,10 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	}
 	
 	/**
+	 * This method removes permission rules with in the runtime context.
 	 * @param string $permission a permission or role to remove the rule from
 	 * @param \Prado\Security\TAuthorizationRule $rule
-	 * @return bool was the removal successful.
+	 * @return bool was the method successful
 	 */
 	public function removePermissionRule($permission, $rule)
 	{
@@ -620,7 +631,8 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	}
 	
 	/**
-	 * @return string[] the roles of the hierarchy.
+	 * Gets all the roles in the hierarchy, though may not be valid roles in the application.
+	 * @return string[] the roles in the hierarchy.
 	 */
 	public function getHierarchyRoles()
 	{
@@ -628,8 +640,9 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	}
 	
 	/**
-	 * @param string $role the role to return its .children
-	 * @return string[] the children of a specific role.
+	 * Gets the children for a specific role in the hierarchy.
+	 * @param string $role the role to return its children
+	 * @return null|string[] the children of a specific role.
 	 */
 	public function getHierarchyRoleChildren($role)
 	{
@@ -638,7 +651,7 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	
 	/**
 	 * @param null|string $permission
-	 * @return array<string, TAuthorizationRuleCollection>|TAuthorizationRuleCollection
+	 * @return null|array<string, TAuthorizationRuleCollection>|TAuthorizationRuleCollection
 	 */
 	public function getPermissionRules($permission = null)
 	{
@@ -650,7 +663,8 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	}
 	
 	/**
-	 * @return string[] array of rolls that get all permissions
+	 * All super roles will get "all" roles and thus all permissions on module init.
+	 * @return null|string[] array of rolls that get all permissions
 	 */
 	public function getSuperRoles()
 	{
@@ -658,7 +672,9 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	}
 	
 	/**
-	 * @param string[] $roles  of rolls that get all permissions
+	 * sets the super roles to get all permissions.
+	 * @param string|string[] $roles  of rolls that get all permissions
+	 * @throws \Prado\Exceptions\TInvalidOperationException when the module is initialized
 	 */
 	public function setSuperRoles($roles)
 	{
@@ -673,7 +689,8 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	}
 	
 	/**
-	 * @return string[] array of rolls that get all permissions
+	 * Gets the default roles of all users.
+	 * @return null|string[] the default roles of all users
 	 */
 	public function getDefaultRoles()
 	{
@@ -681,7 +698,8 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	}
 	
 	/**
-	 * @param string[] $roles  of rolls that get all permissions
+	 * @param string|string[] $roles the default roles of all users
+	 * @throws \Prado\Exceptions\TInvalidOperationException when the module is initialized
 	 */
 	public function setDefaultRoles($roles)
 	{
@@ -695,7 +713,7 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	}
 
 	/**
-	 * @return string the full path to the file storing user/role information
+	 * @return string the full path to the file storing role/rule information
 	 */
 	public function getPermissionFile()
 	{
@@ -703,10 +721,10 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	}
 
 	/**
-	 * @param string $value user/role data file path (in namespace form). The file format is XML
-	 * whose content is similar to that user/role block in application configuration.
-	 * @throws TInvalidOperationException if the module is already initialized
-	 * @throws TConfigurationException if the file is not in proper namespace format
+	 * @param string $value role/rule data file path (in namespace form). The file format is configuration format
+	 * whose content is similar to that role/rule block in the module configuration.
+	 * @throws \Prado\Exceptions\TInvalidOperationException if the module is already initialized
+	 * @throws \Prado\Exceptions\TConfigurationException if the file is not in proper namespace format
 	 */
 	public function setPermissionFile($value)
 	{
@@ -718,7 +736,7 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	}
 	
 	/**
-	 * @return numeric the priority of Allow With Permission and Module Rules, default 5
+	 * @return numeric the priority of Allow With Permission and Preset Rules, default 5
 	 */
 	public function getAutoRulePriority()
 	{
@@ -726,7 +744,8 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	}
 	
 	/**
-	 * @param numeric $priority the priority of Allow With Permission and Module Rules
+	 * @param numeric $priority the priority of Allow With Permission and Preset Rules
+	 * @throws \Prado\Exceptions\TInvalidOperationException if the module is already initialized
 	 */
 	public function setAutoRulePriority($priority)
 	{
@@ -746,6 +765,7 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	
 	/**
 	 * @param bool $enable enable Allow With Permission rule
+	 * @throws \Prado\Exceptions\TInvalidOperationException if the module is already initialized
 	 */
 	public function setAutoAllowWithPermission($enable)
 	{
@@ -765,6 +785,7 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	
 	/**
 	 * @param bool $enable the priority of Allow With Permission
+	 * @throws \Prado\Exceptions\TInvalidOperationException if the module is already initialized
 	 */
 	public function setAutoPresetRules($enable)
 	{
@@ -784,6 +805,7 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	
 	/**
 	 * @param bool $enable the priority of Allow With Permission
+	 * @throws \Prado\Exceptions\TInvalidOperationException if the module is already initialized
 	 */
 	public function setAutoDenyAll($enable)
 	{
@@ -803,6 +825,7 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	
 	/**
 	 * @param numeric $priority the priority of Deny All rule
+	 * @throws \Prado\Exceptions\TInvalidOperationException if the module is already initialized
 	 */
 	public function setAutoDenyAllPriority($priority)
 	{
@@ -813,7 +836,7 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	}
 
 	/**
-	 * @return Prado\Util\TDbParameterModule user manager instance
+	 * @return Prado\Util\TDbParameterModule DbParameter instance
 	 */
 	public function getDbParameter()
 	{
@@ -821,8 +844,9 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	}
 
 	/**
-	 * @param IUserManager|string $provider the user manager module ID or the user manager object
-	 * @throws TInvalidOperationException if the module has been initialized or the user manager object is not IUserManager
+	 * @param IUserManager|string $provider the user manager module ID or the DbParameter object
+	 * @throws \Prado\Exceptions\TInvalidOperationException if the module is already initialized
+	 * @throws \Prado\Exceptions\TConfigurationException if the $provider is not a TDbParameterModule
 	 */
 	public function setDbParameter($provider)
 	{
@@ -836,7 +860,7 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	}
 
 	/**
-	 * @return Prado\Util\TDbParameterModule user manager instance
+	 * @return string name of the parameter to load
 	 */
 	public function getLoadParameter()
 	{
@@ -844,8 +868,8 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	}
 
 	/**
-	 * @param string $value the user manager module ID or the user manager object
-	 * @throws TInvalidOperationException if the module has been initialized or the user manager object is not IUserManager
+	 * @param string $value name of the parameter to load
+	 * @throws \Prado\Exceptions\TInvalidOperationException if the module is already initialized
 	 */
 	public function setLoadParameter($value)
 	{
@@ -856,7 +880,7 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	}
 	
 	/**
-	 * detaches the class behaviors
+	 * detaches the automatic class behaviors
 	 */
 	public function __destruct()
 	{
