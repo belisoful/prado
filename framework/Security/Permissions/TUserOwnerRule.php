@@ -5,7 +5,7 @@
  * @author Brad Anderson <belisoful@icloud.com>
  * @link https://github.com/pradosoft/prado
  * @license https://github.com/pradosoft/prado/blob/master/LICENSE
- * @package Prado\Security
+ * @package Prado\Security\Permissions
  */
 
 namespace Prado\Security\Permissions;
@@ -18,7 +18,7 @@ use Prado\Security\TAuthorizationRule;
  * TUserOwnerRule class
  *
  * TUserOwnerRule will check if the extra data sent to isUserAllowed
- * has a user name that matches the the user
+ * has a user name that matches the parameter user name.
  *
  * @author Brad Anderson <belisoful@icloud.com>
  * @package Prado\Security\Permissions

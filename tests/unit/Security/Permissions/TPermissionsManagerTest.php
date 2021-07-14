@@ -133,7 +133,7 @@ class TPermissionsManagerTest extends PHPUnit\Framework\TestCase
 	public function testLoadPermissionsData()
 	{
 		$perm1 = TPermissionsManager::PERM_PERMISSIONS_MANAGE_ROLES;
-		$perm2 = TPermissionsManager::PERM_PERMISSIONS_MANAGE_PERMISSION_RULES;
+		$perm2 = TPermissionsManager::PERM_PERMISSIONS_MANAGE_RULES;
 		$configXml = "<module id='permissions' superRoles='Administrator'>
 		<role name='AdministratorXML' children='ManagerXML, DeveloperXML, Editor, Contributor, Subscriber, cron' />
 		<role name='ManagerXML' children='{$perm1}, {$perm2}' />
@@ -155,8 +155,8 @@ class TPermissionsManagerTest extends PHPUnit\Framework\TestCase
 		//Test XML roles
 		self::assertEquals(['administratorxml', 'managerxml', 'developerxml', 'all'], $this->obj->getHierarchyRoles());
 		self::assertEquals(['managerxml', 'developerxml', 'editor', 'contributor', 'subscriber', 'cron'], $this->obj->getHierarchyRoleChildren('AdministratorXML'));
-		self::assertEquals([TPermissionsManager::PERM_PERMISSIONS_MANAGE_ROLES, TPermissionsManager::PERM_PERMISSIONS_MANAGE_PERMISSION_RULES], $this->obj->getHierarchyRoleChildren('ManagerXML'));
-		self::assertEquals([TPermissionsManager::PERM_PERMISSIONS_MANAGE_ROLES, TPermissionsManager::PERM_PERMISSIONS_MANAGE_PERMISSION_RULES], $this->obj->getHierarchyRoleChildren('DeveloperXML'));
+		self::assertEquals([TPermissionsManager::PERM_PERMISSIONS_MANAGE_ROLES, TPermissionsManager::PERM_PERMISSIONS_MANAGE_RULES], $this->obj->getHierarchyRoleChildren('ManagerXML'));
+		self::assertEquals([TPermissionsManager::PERM_PERMISSIONS_MANAGE_ROLES, TPermissionsManager::PERM_PERMISSIONS_MANAGE_RULES], $this->obj->getHierarchyRoleChildren('DeveloperXML'));
 		
 		
 		//Test XML Permission Rules
@@ -193,8 +193,8 @@ class TPermissionsManagerTest extends PHPUnit\Framework\TestCase
 		//	children as string and array
 		self::assertEquals(['administratorphp', 'managerphp', 'developerphp', 'all'], $this->obj->getHierarchyRoles());
 		self::assertEquals(['managerphp', 'developerphp', 'editor', 'contributor', 'subscriber', 'cron'], $this->obj->getHierarchyRoleChildren('Administratorphp'));
-		self::assertEquals([TPermissionsManager::PERM_PERMISSIONS_MANAGE_ROLES, TPermissionsManager::PERM_PERMISSIONS_MANAGE_PERMISSION_RULES], $this->obj->getHierarchyRoleChildren('Managerphp'));
-		self::assertEquals([TPermissionsManager::PERM_PERMISSIONS_MANAGE_ROLES, TPermissionsManager::PERM_PERMISSIONS_MANAGE_PERMISSION_RULES], $this->obj->getHierarchyRoleChildren('Developerphp'));
+		self::assertEquals([TPermissionsManager::PERM_PERMISSIONS_MANAGE_ROLES, TPermissionsManager::PERM_PERMISSIONS_MANAGE_RULES], $this->obj->getHierarchyRoleChildren('Managerphp'));
+		self::assertEquals([TPermissionsManager::PERM_PERMISSIONS_MANAGE_ROLES, TPermissionsManager::PERM_PERMISSIONS_MANAGE_RULES], $this->obj->getHierarchyRoleChildren('Developerphp'));
 		//Test php Permission Rules
 		$rules = $this->obj->getPermissionRules($perm2);
 		
@@ -202,7 +202,7 @@ class TPermissionsManagerTest extends PHPUnit\Framework\TestCase
 		self::assertInstanceof('Prado\\Security\\TAuthorizationRuleCollection', $rules);
 		self::assertEquals(1, count($rules));
 		self::assertEquals('deny', $rules[0]->getAction());
-		self::assertEquals([TPermissionsManager::PERM_PERMISSIONS_MANAGE_PERMISSION_RULES], $rules[0]->getRoles());
+		self::assertEquals([TPermissionsManager::PERM_PERMISSIONS_MANAGE_RULES], $rules[0]->getRoles());
 		
 		$this->obj->__destruct();
 		
@@ -504,7 +504,7 @@ class TPermissionsManagerTest extends PHPUnit\Framework\TestCase
 		self::assertNull($this->obj->getPermissionRules(TPermissionsManager::PERM_PERMISSIONS_MANAGE_ROLES));
 		
 		$this->obj->init(null);
-		self::assertEquals(['permissions_manage_roles', 'permissions_manage_permission_rules'], array_keys($this->obj->getPermissionRules()));
+		self::assertEquals([TPermissionsManager::PERM_PERMISSIONS_MANAGE_ROLES, TPermissionsManager::PERM_PERMISSIONS_MANAGE_RULES], array_keys($this->obj->getPermissionRules()));
 		self::assertNotNull($rules = $this->obj->getPermissionRules(TPermissionsManager::PERM_PERMISSIONS_MANAGE_ROLES));
 		self::assertInstanceOf('Prado\\Security\\TAuthorizationRuleCollection', $rules);
 		self::assertEquals(2, count($rules));

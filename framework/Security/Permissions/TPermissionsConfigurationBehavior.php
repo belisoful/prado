@@ -5,7 +5,7 @@
  * @author Brad Anderson <belisoful@icloud.com>
  * @link https://github.com/pradosoft/prado
  * @license https://github.com/pradosoft/prado/blob/master/LICENSE
- * @package Prado\Util\Cron
+ * @package Prado\Security\Permissions
  */
 
 namespace Prado\Security\Permissions;
@@ -18,8 +18,16 @@ use Prado\Util\TBehavior;
  *
  * TPermissionsConfigurationBehavior is designed specifically to attach to the
  * {@link TPageConfiguration} class objects.  It reads and parses the
- * permissions role hierarchy are permissions rules from a page configuration
- * file.
+ * permissions role hierarchy and permissions rules from a page configuration
+ * file.  Within the config.xml for a page, for example, add the following:
+ * <code>
+ * 		<permissions>
+ *			<role name="pageRole" children="otherRole, permission_name" />
+ *			<permissionRule name="permission_name" action="allow" roles="manager"/>
+ *		</permissions>
+ * </code>
+ *
+ * See <@link TPermissionsManager> for information on php configurations.
  *
  * @author Brad Anderson <belisoful@icloud.com>
  * @package Prado\Security\Permissions
@@ -27,14 +35,14 @@ use Prado\Util\TBehavior;
  */
 class TPermissionsConfigurationBehavior extends TBehavior
 {
-	/** @var TPermissionsManager manager object for the behavior */
+	/** @var \Prado\Security\Permissions\TPermissionsManager manager object for the behavior */
 	private $_manager;
 	
+	/** @var array|\Prado\Xml\TXmlElement permissions data to parse */
 	private $_permissions = [];
 	
 	/**
-	 * @param TPermissionsManager
-	 * @param null|mixed $manager
+	 * @param null|\Prado\Security\Permissions\TPermissionsManager $manager
 	 */
 	public function __construct($manager = null)
 	{
@@ -47,9 +55,9 @@ class TPermissionsConfigurationBehavior extends TBehavior
 	/**
 	 * Loads the configuration specific for page service. This may be called multiple
 	 * times.
-	 * @param array $config config xml element
-	 * @param string $configPath base path corresponding to this xml element
-	 * @param string $configPagePath the page path that the config XML is associated with. The page path doesn't include the page name.
+	 * @param array $config config array
+	 * @param string $configPath base path corresponding to this php element
+	 * @param string $configPagePath the page path that the config php is associated with. The page path doesn't include the page name.
 	 * @param \Prado\Util\TCallChain $callchain
 	 */
 	public function dyLoadPageConfigurationFromPhp($config, $configPath, $configPagePath, $callchain)
@@ -91,7 +99,7 @@ class TPermissionsConfigurationBehavior extends TBehavior
 	}
 	
 	/**
-	 * @param TPermissionsManager $manager manages permissions
+	 * @return \Prado\Security\Permissions\TPermissionsManager manages application permissions
 	 */
 	public function getManager()
 	{
@@ -99,7 +107,7 @@ class TPermissionsConfigurationBehavior extends TBehavior
 	}
 	
 	/**
-	 * @param TPermissionsManager $manager manages permissions
+	 * @param \Prado\Security\Permissions\TPermissionsManager|\WeakReference $manager manages application permissions
 	 */
 	public function setManager($manager)
 	{

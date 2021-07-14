@@ -5,7 +5,7 @@
  * @author Brad Anderson <belisoful@icloud.com>
  * @link https://github.com/pradosoft/prado
  * @license https://github.com/pradosoft/prado/blob/master/LICENSE
- * @package Prado\Util\Cron
+ * @package Prado\Security\Permissions
  */
 
 namespace Prado\Security\Permissions;
@@ -17,10 +17,11 @@ use Prado\Util\TBehavior;
 /**
  * TUserPermissionsBehavior class.
  *
- * TUserPermissionsBehavior adds {@link can} permissions functionality. It also
- * handles {@link dyDefaultRoles} and {@link dyIsInRole} from TUser.
+ * TUserPermissionsBehavior is designed to attach to {@link TUser}.
+ * This class adds {@link can} permissions functionality. It also
+ * handles {@link dyDefaultRoles} and {@link dyIsInRole} of TUser.
  *
- * This passes through dyDefaultRoles and dyIsInRole to the manager.
+ * This passes through dyDefaultRoles and dyIsInRole to the {@link TPermissionsManager}.
  *
  * @author Brad Anderson <belisoful@icloud.com>
  * @package Prado\Security\Permissions
@@ -28,12 +29,11 @@ use Prado\Util\TBehavior;
  */
 class TUserPermissionsBehavior extends TBehavior
 {
-	/** @var TPermissionsManager manager object for the behavior */
+	/** @var \Prado\Security\Permissions\TPermissionsManager manager object for the behavior */
 	private $_manager;
 	
 	/**
-	 * @param TPermissionsManager
-	 * @param null|mixed $manager
+	 * @param null|\Prado\Security\Permissions\TPermissionsManager $manager
 	 */
 	public function __construct($manager = null)
 	{
@@ -59,7 +59,7 @@ class TUserPermissionsBehavior extends TBehavior
 	}
 	
 	/**
-	 * @param string[] $roles
+	 * @param string[] $roles The default roles of all users
 	 * @param Prado\Util\TCallChain $callchain
 	 * @return string[] the default roles of all users
 	 */
@@ -72,7 +72,7 @@ class TUserPermissionsBehavior extends TBehavior
 	/**
 	 * This handles the dynamic event where the $role does not match the user
 	 * roles.  It checks the hierarchy of roles/permissions
-	 * @param bool $return
+	 * @param bool $return the return value, initially false
 	 * @param string $role
 	 * @param Prado\Util\TCallChain $callchain
 	 */
@@ -83,7 +83,7 @@ class TUserPermissionsBehavior extends TBehavior
 	}
 	
 	/**
-	 * @param TPermissionsManager $manager manages permissions
+	 * @param TPerm\Prado\Security\Permissions\TPermissionsManagerissionsManager $manager manages application permissions
 	 */
 	public function getManager()
 	{
@@ -91,7 +91,7 @@ class TUserPermissionsBehavior extends TBehavior
 	}
 	
 	/**
-	 * @param TPermissionsManager $manager manages permissions
+	 * @param \Prado\Security\Permissions\TPermissionsManager|\WeakReference $manager manages application permissions
 	 */
 	public function setManager($manager)
 	{

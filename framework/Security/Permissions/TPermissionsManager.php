@@ -1,11 +1,11 @@
 <?php
 /**
- * TPermissionsManager Class File
+ * TPermissionsManager class file
  *
  * @author Brad Anderson <belisoful@icloud.com>
  * @link https://github.com/pradosoft/prado
  * @license https://github.com/pradosoft/prado/blob/master/LICENSE
- * @package Prado\Util
+ * @package Prado\Security\Permissions
  */
 
 namespace Prado\Security\Permissions;
@@ -26,11 +26,11 @@ use Prado\Xml\TXmlElement;
 /**
  * TPermissionsManager class.
  *
- * TPermissionsManager has two parts: Permission Authentication and Roll Based
+ * TPermissionsManager handles Permissions authorization and  Roll Based
  * Access Control (RBAC).  Each registered Permission is given a set of
  * {@link \Prado\Security\TAuthorizationRule}s.  The RBAC is based on roles
- * having children roles and permissions being thought of as special roles
- * themselves.
+ * having children roles and permissions, with permissions being thought of
+ * as special roles themselves.
  *
  * TPermissionsManager attaches {@link TPermissionsBehavior} to all classes
  * that implement {@link IPermissions}.  This is the main mechanism
@@ -87,46 +87,48 @@ use Prado\Xml\TXmlElement;
  * </module>
  *
  * In this example, "cron" is not a permission, but when used as a permission,
- * all children permissions will receive the rule.  Permissions with children,
- * such as cron_shell (above), will give all its children the rule as
+ * all children roles/permissions will receive the rule.  Permissions with children,
+ * such as 'cron_shell' (above), will give all its children the rule as
  * well.
  *
  * A special role "All" is automatically created to contain all the permissions.
- * this is the same as specifying a role as a super role via {@link setSuperRoles}.
+ * Specifying "all" as a child, is the same as specifying a role as a super role
+ * via {@link setSuperRoles}.
  *
  * All users get the roles specified by {@link getDefaultRoles}.  This changes
  * the default Prado behavior for guest users having no roles.
  *
  * Intermediate roles, that are not defined in the user system, may be defined in
  * the hierarchy, in the above example the "cron" role is not defined by the system,
- * but is defined in the hierarchy.
+ * but is defined in the role hierarchy.
  *
- * Permissions can have multiple permission rules with the same name. they are
- * ordered by natural specified order unless the rule property
- * {@link TAuthorizationRule::Priority} is set.
+ * Permission Rules can have multiple rules. they are
+ * ordered by natural specified configuration order unless the rule property
+ * {@link TAuthorizationRule::setPriority} is set.
  *
- * Permissions Authentication rules may use the '*' or 'perm_*' to add the rules to all
+ * Permissions authorization rules may use the '*' or 'perm_*' to add the rules to all
  * matching permission names.  Anything before the * is matched as a permission.
  * This does not traverse the hierarchy roles matching the name, just the permissions
  * are matched for the TAuthorizationRule.
  *
- * A permission must list itself as a TAuthorizationRule role for the user to be
- * validated for that permission for authorization.  This is handled automatically
+ * A permission name  must list itself as a role in TAuthorizationRule for the user to be
+ * validated for that permission name for authorization.  This is handled automatically
  * by TPermissionManager with the {@link getAutoAllowWithPermission} property.
  * By default getAutoAllowWithPermission is true, and allows any user with
  * that permission in their hierarchy to allow access to the functionality.
  * This rule priority can be set with {@link getAutoRulePriority},
- * where the default is 5 before user defined rules.
+ * where the default is 5, and -thus- before user defined rules.
  *
- * The second automatic rules includes Modules have their own data rules that can
- * be automatically added via {@link getAutoRuleModuleRules}.  By default this
- * is true. These rules allow owners of the data to be permitted without having
- * a permission-role.  Modules roles can define their own priorities but those
+ * The second automatic rules includes Modules have their own preset rules that can
+ * be automatically added via {@link getAutoPresetRules}.  By default this
+ * is true. These rules typically allow owners of the data to be permitted without having
+ * a permission-role.  Preset roles can define their own priorities but those
  * without set priorities receive the priority from {@link getAutoRulePriority}.
  *
- * The third, and last, autoRule is the final {@link getAutoDenyAll DenyAll}
+ * The third, and last, auto-Rule is the final {@link getAutoDenyAll DenyAll}
  * rule. This is the last rule that denies all by default.  The AutoDenyAll
- * gets its rule priority from {@link getAutoDenyAllPriority}
+ * gets its rule priority from {@link getAutoDenyAllPriority}.  By default,
+ * deny all to all permissions is enabled and thus blocking all permissions.
  *
  * Recursive hierarchy is gracefully handled, in case of any loop structures.
  *
@@ -148,7 +150,7 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	
 	public const PERM_PERMISSIONS_MANAGE_ROLES = 'permissions_manage_roles';
 	
-	public const PERM_PERMISSIONS_MANAGE_PERMISSION_RULES = 'permissions_manage_permission_rules';
+	public const PERM_PERMISSIONS_MANAGE_RULES = 'permissions_manage_rules';
 	
 	/** @var string[] roles that get all permissions, default [] */
 	private $_superRoles;
@@ -208,7 +210,7 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	{
 		return [
 			new TPermissionEvent(static::PERM_PERMISSIONS_MANAGE_ROLES, 'Manages Db Permissions Role Children.', ['dyAddRoleChildren', 'dyRemoveRoleChildren']),
-			new TPermissionEvent(static::PERM_PERMISSIONS_MANAGE_PERMISSION_RULES, 'Manages Db Permissions Rules.', ['dyAddPermissionRule', 'dyRemovePermissionRule'])
+			new TPermissionEvent(static::PERM_PERMISSIONS_MANAGE_RULES, 'Manages Db Permissions Rules.', ['dyAddPermissionRule', 'dyRemovePermissionRule'])
 		];
 	}
 	
