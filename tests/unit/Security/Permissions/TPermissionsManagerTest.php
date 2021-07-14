@@ -16,8 +16,9 @@ class TPermissionsManagerTest extends PHPUnit\Framework\TestCase
 	{
 		// ini_set('session.use_cookies',0);
 		// ini_set('session.cache_limiter', 'none');
-		echo Prado::varDump(Prado::getApplication()->getEventHandlers('fxattachclassbehavior')->toArray());
 		if (self::$app === null) {
+			Prado::getApplication()->getEventHandlers('fxattachclassbehavior')->clear();
+			Prado::getApplication()->getEventHandlers('fxdetachclassbehavior')->clear();
 			self::$app = new TApplication(__DIR__ . '/../app');
 		}
 		
@@ -29,11 +30,11 @@ class TPermissionsManagerTest extends PHPUnit\Framework\TestCase
 		$this->obj->__destruct();
 		$this->obj = null;
 	}
-	/*
+	
 	public function testConstruct()
 	{
 		self::assertInstanceOf('Prado\\Security\\Permissions\\TPermissionsManager', $this->obj);
-	}*/
+	}
 	
 	public function testInit()
 	{
