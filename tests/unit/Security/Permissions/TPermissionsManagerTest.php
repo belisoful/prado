@@ -33,7 +33,7 @@ class TPermissionsManagerTest extends PHPUnit\Framework\TestCase
 	{
 		self::assertInstanceOf('Prado\\Security\\Permissions\\TPermissionsManager', $this->obj);
 	}
-	/*
+	
 	public function testInit()
 	{
 		self::assertNull($this->obj->asa(TPermissionsManager::PERMISSIONS_BEHAVIOR));
@@ -87,7 +87,7 @@ class TPermissionsManagerTest extends PHPUnit\Framework\TestCase
 		// testDBParameter tests load Data from DBParameter
 		// testSuperRoles tests Super Roles
 	}
-	
+	/*
 	public function testRegisterPermission()
 	{
 		$this->obj->setAutoAllowWithPermission(false);
