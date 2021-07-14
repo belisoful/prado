@@ -37,8 +37,8 @@ class TPermissionsManagerTest extends PHPUnit\Framework\TestCase
 	public function testInit()
 	{
 		self::assertNull($this->obj->asa(TPermissionsManager::PERMISSIONS_BEHAVIOR));
-		//echo Prado::varDump($this->getEventHandlers('fxattachclassbehavior'));
-		//echo Prado::varDump($this->getEventHandlers(TComponent::GLOBAL_RAISE_EVENT_LISTENER));
+		echo Prado::varDump($this->obj->getEventHandlers('fxattachclassbehavior')->toArray());
+		echo Prado::varDump($this->obj->getEventHandlers(TComponent::GLOBAL_RAISE_EVENT_LISTENER)->toArray());
 		$this->obj->init(null);
 		
 		//check class behaviors

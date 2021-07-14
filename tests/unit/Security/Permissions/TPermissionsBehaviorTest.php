@@ -15,6 +15,10 @@ use Prado\Xml\TXmlDocument;
 class TPermissionsBehaviorTest extends PHPUnit\Framework\TestCase
 {
 	protected $behavior;
+	
+	protected $manager;
+	protected $usermanager;
+	protected $user;
 
 	protected function setUp(): void
 	{
@@ -24,6 +28,18 @@ class TPermissionsBehaviorTest extends PHPUnit\Framework\TestCase
 	protected function tearDown(): void
 	{
 		$this->behavior = null;
+		if ($this->user) {
+			$this->user->__destruct();
+			$this->user = null;
+		}
+		if ($this->usermanager) {
+			$this->usermanager->__destruct();
+			$this->usermanager = null;
+		}
+		if ($this->manager) {
+			$this->manager->__destruct();
+			$this->manager = null;
+		}
 	}
 
 	public function testConstruct()
@@ -46,7 +62,7 @@ class TPermissionsBehaviorTest extends PHPUnit\Framework\TestCase
 	public function testAttachAndEvent()
 	{
 		$permission = TPermissionsManager::PERM_PERMISSIONS_MANAGE_ROLES;
-		$manager = new TPermissionsManager();
+		$this->manager = $manager = new TPermissionsManager();
 		$manager->setId('perms');
 		$this->behavior->setManager($manager);
 		
@@ -63,8 +79,8 @@ class TPermissionsBehaviorTest extends PHPUnit\Framework\TestCase
 		self::assertEquals(2, count($manager->getPermissionRules($permission)));
 		
 		$userName = 'developer3';
-		$userManager = new TUserManager();
-		$user = new TUser($userManager);
+		$this->usermanager = $userManager = new TUserManager();
+		$this->user = $user = new TUser($userManager);
 		$user->setName($userName);
 		Prado::getApplication()->setUser($user);
 		$user->attachBehavior('can', ['class' => 'Prado\Security\Permissions\TUserPermissionsBehavior', 'manager' => $manager]);
@@ -103,11 +119,6 @@ class TPermissionsBehaviorTest extends PHPUnit\Framework\TestCase
 		
 		self::assertTrue($manager->dyAddRoleChildren(false, $role, $children, $_extra));
 		self::assertTrue($manager->dyRemoveRoleChildren(false, $role, $children, $_extra));
-		
-		$user = null;
-		$userManager = null;
-		$manager->__destruct();
-		$manager = null;
 	}
 	
 
