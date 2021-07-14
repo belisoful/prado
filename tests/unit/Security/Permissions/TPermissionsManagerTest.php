@@ -89,7 +89,7 @@ class TPermissionsManagerTest extends PHPUnit\Framework\TestCase
 		// testDBParameter tests load Data from DBParameter
 		// testSuperRoles tests Super Roles
 	}
-	/*
+	
 	public function testRegisterPermission()
 	{
 		$this->obj->setAutoAllowWithPermission(false);
@@ -829,7 +829,5 @@ class TPermissionsManagerTest extends PHPUnit\Framework\TestCase
 		$user = null;
 		$userManager = null;
 	}
-	
-	*/
 
 }
