@@ -505,7 +505,7 @@ class TDbCronModule extends TCronModule implements \Prado\Util\IDbModule
 	 */
 	public function addTask($task, $runtime = false)
 	{
-		if ($this->dyAddTask(false, $task, $runtime)) {
+		if ($this->dyAddTask(false, $task, $runtime) === true) {
 			return false;
 		}
 		return $this->addTaskInternal($task, $runtime);
@@ -577,7 +577,7 @@ class TDbCronModule extends TCronModule implements \Prado\Util\IDbModule
 	 */
 	public function updateTask($task)
 	{
-		if ($this->dyUpdateTask(false, $task, ['extra' => ['username' => $task->getUserName()]])) {
+		if ($this->dyUpdateTask(false, $task, ['extra' => ['username' => $task->getUserName()]]) === true) {
 			return false;
 		}
 		return $this->updateTaskInternal($task);
@@ -645,7 +645,7 @@ class TDbCronModule extends TCronModule implements \Prado\Util\IDbModule
 				return false;
 			}
 		}
-		if ($this->dyRemoveTask(false, $untask, ['extra' => ['username' => ($task ?? $untask)->getUserName()]])) {
+		if ($this->dyRemoveTask(false, $untask, ['extra' => ['username' => ($task ?? $untask)->getUserName()]]) === true) {
 			return false;
 		}
 		return $this->removeTaskInternal($untask);
@@ -710,7 +710,7 @@ class TDbCronModule extends TCronModule implements \Prado\Util\IDbModule
 	 */
 	public function clearCronLog($seconds)
 	{
-		if ($this->dyClearCronLog(false, $seconds)) {
+		if ($this->dyClearCronLog(false, $seconds) === true) {
 			return false;
 		}
 		$this->ensureTable();
@@ -737,7 +737,7 @@ class TDbCronModule extends TCronModule implements \Prado\Util\IDbModule
 	 */
 	public function removeCronLogItem($taskUID)
 	{
-		if ($this->dyRemoveCronLogItem(false, $taskUID)) {
+		if ($this->dyRemoveCronLogItem(false, $taskUID) === true) {
 			return false;
 		}
 		$this->ensureTable();
@@ -756,7 +756,7 @@ class TDbCronModule extends TCronModule implements \Prado\Util\IDbModule
 	 */
 	public function getCronLogCount($name = null)
 	{
-		if ($this->dyGetCronLogCount(false, $name)) {
+		if ($this->dyGetCronLogCount(false, $name) === true) {
 			return false;
 		}
 		$this->ensureTable();
@@ -784,7 +784,7 @@ class TDbCronModule extends TCronModule implements \Prado\Util\IDbModule
 	 */
 	public function getCronLog($name, $pageSize, $offset, $sortingDesc = null)
 	{
-		if ($this->dyGetCronLog(false, $name, $pageSize, $offset, $sortingDesc)) {
+		if ($this->dyGetCronLog(false, $name, $pageSize, $offset, $sortingDesc) === true) {
 			return false;
 		}
 		$this->ensureTable();
