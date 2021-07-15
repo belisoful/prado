@@ -30,7 +30,7 @@ use Prado\Shell\TShellWriter;
  * <code>
  * require 'path/to/vendor/autoload.php';
  * $application=new TShellApplication('path/to/application.xml');
- * $application->run();
+ * $application->run($_SERVER);
  * // perform command-line tasks here
  * </code>
  *
@@ -264,6 +264,7 @@ class TShellApplication extends \Prado\TApplication
 	
 
 	/**
+	 * This registers shell command line options and the setter callback
 	 * @param string $name name of the option at the command line
 	 * @param callable $setCallback the callback to set the property
 	 * @since 4.2.0
@@ -275,6 +276,7 @@ class TShellApplication extends \Prado\TApplication
 	
 
 	/**
+	 * This registers shell command line option aliases and linked variable
 	 * @param string $alias the short command
 	 * @param string $name the command name
 	 * @since 4.2.0
@@ -285,19 +287,19 @@ class TShellApplication extends \Prado\TApplication
 	}
 	
 	/**
-	 * @return ITextWriter the writer for the class
+	 * @return \Prado\Shell\TShellWriter the writer for the class
 	 * @since 4.2.0
 	 */
-	public function getWriter(): ITextWriter
+	public function getWriter(): TShellWriter
 	{
 		return $this->_outWriter;
 	}
 	
 	/**
-	 * @@param ITextWriter $writer the writer for the class
+	 * @@param \Prado\Shell\TShellWriter $writer the writer for the class
 	 * @since 4.2.0
 	 */
-	public function setWriter(ITextWriter $writer)
+	public function setWriter(TShellWriter $writer)
 	{
 		$this->_outWriter = $writer;
 	}

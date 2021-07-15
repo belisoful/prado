@@ -59,7 +59,7 @@ class TDbParameterAction extends TShellAction
 	 * @param string $actionID the action being executed
 	 * @return array properties for the $actionID
 	 */
-	public function options($actionID)
+	public function options($actionID): array
 	{
 		if ($actionID === 'index') {
 			return ['all'];
@@ -72,14 +72,15 @@ class TDbParameterAction extends TShellAction
 	 * @param string $actionID the action being executed
 	 * @return array<alias, property> properties for the $actionID
 	 */
-	public function optionAliases()
+	public function optionAliases(): array
 	{
 		return ['a' => 'all'];
 	}
 	
 	/**
+	 * display the database parameter key values.
 	 * @param array $args parameters
-	 * @return bool
+	 * @return bool is the action handled
 	 */
 	public function actionIndex($args)
 	{
@@ -118,8 +119,9 @@ class TDbParameterAction extends TShellAction
 	}
 	
 	/**
+	 * gets a parameter value
 	 * @param array $args parameters
-	 * @return bool
+	 * @return bool is the action handled
 	 */
 	public function actionGet($args)
 	{
@@ -141,8 +143,9 @@ class TDbParameterAction extends TShellAction
 	}
 	
 	/**
+	 * Sets a parameter value
 	 * @param array $args parameters
-	 * @return bool
+	 * @return bool is the action handled
 	 */
 	public function actionSet($args)
 	{
@@ -175,6 +178,7 @@ class TDbParameterAction extends TShellAction
 	}
 	
 	/**
+	 * get the TDBParameterModule from the Application
 	 * @return Prado\Util\TDBParameterModule
 	 */
 	public function getDbParameterModule()

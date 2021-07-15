@@ -69,7 +69,7 @@ abstract class TShellAction extends \Prado\TComponent
 	 * @param string $actionID the action being executed
 	 * @return array properties for the $actionID
 	 */
-	public function options($actionID)
+	public function options($actionID): array
 	{
 		return [];
 	}
@@ -79,7 +79,7 @@ abstract class TShellAction extends \Prado\TComponent
 	 * @param string $actionID the action being executed
 	 * @return array<alias, property> properties for the $actionID
 	 */
-	public function optionAliases()
+	public function optionAliases(): array
 	{
 		return [];
 	}
@@ -142,6 +142,7 @@ abstract class TShellAction extends \Prado\TComponent
 	}
 	
 	/**
+	 * renders help for the command
 	 * @param string $cmd
 	 */
 	public function renderHelpCommand($cmd)
@@ -182,6 +183,7 @@ abstract class TShellAction extends \Prado\TComponent
 	}
 	
 	/**
+	 * Renders General Help for the command
 	 * @return string
 	 */
 	public function renderHelp()

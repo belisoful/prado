@@ -33,8 +33,9 @@ class THelpAction extends TShellAction
 		'Displays available commands or detailed command information.'];
 	
 	/**
+	 * displays help for a specific command or the general help
 	 * @param array $args parameters
-	 * @return bool
+	 * @return bool is the action handled
 	 */
 	public function actionIndex($args)
 	{

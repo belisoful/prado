@@ -36,7 +36,7 @@ class TFlushCachesAction extends TShellAction
 	];
 	
 	/**
-	 * this flushes an array of ICache modules
+	 * This flushes an array of ICache modules
 	 * @param array $args parameters
 	 * @return bool Action was performed
 	 */
@@ -90,7 +90,6 @@ class TFlushCachesAction extends TShellAction
 		$this->_outWriter->writeLine();
 		return true;
 	}
-	//help text Use case: upgrading a performance mode website by clearing out the old cache.
 	
 	/**
 	 * Displays the ICache (by module ID) in the application that can be flushed

@@ -49,8 +49,9 @@ class TActiveRecordAction extends TShellAction
 	
 	
 	/**
+	 * This is the Shell Command for Generating all Action Record table skeletons
 	 * @param array $args parameters
-	 * @return bool
+	 * @return bool is the action handled
 	 */
 	public function actionGenerateAll($args)
 	{
@@ -128,8 +129,9 @@ class TActiveRecordAction extends TShellAction
 	
 	
 	/**
+	 * This is the Shell Command for Generating a specific Action Record table skeleton
 	 * @param array $args parameters
-	 * @return bool
+	 * @return bool is the action handled
 	 */
 	public function actionGenerate($args)
 	{
@@ -146,6 +148,7 @@ class TActiveRecordAction extends TShellAction
 	}
 
 	/**
+	 * gets the TActiveRecordConfig for the application
 	 * @return false|TActiveRecordConfig
 	 */
 	protected function getActiveRecordConfig()

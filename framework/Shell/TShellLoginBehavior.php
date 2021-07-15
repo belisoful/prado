@@ -29,7 +29,7 @@ use Prado\Prado;
  * </code>
  *
  * @author Brad Anderson <belisoful@icloud.com>
- * @package Prado\Util\Behaviors
+ * @package Prado\Shell
  * @since 4.2.0
  */
 
