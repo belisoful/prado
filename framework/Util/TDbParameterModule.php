@@ -149,13 +149,7 @@ class TDbParameterModule extends TModule implements IDbModule, IPermissions
 	 * @var TMapRouteBehavior captures all the changes to the parameters to the db
 	 */
 	private $_setBehavior;
-	
-	/**
-	 * @var bool whether or not to have shell access enabled.  Default false.
-	 */
-	private $_shellAccess = false;
 
-	
 	/**
 	 * Initializes the module by loading parameters.
 	 * @param mixed $config content enclosed within the module tag
