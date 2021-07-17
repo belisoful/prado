@@ -67,7 +67,7 @@ foreach ($_SERVER['argv'] as $i => $arg) {
 
 if (!$found && !$dir_option) {
 	$writer = new Prado\Shell\TShellWriter(new Prado\IO\TOutputWriter());
-	$writer->writeError("Application could not be found.  Specify the app config directory with '-d=/path/to/app/config/protected'.");
+	$writer->writeError("Application could not be found.  Specify the app config directory with '-d=/path/to/app/protected'.");
 	$writer->flush();
 	exit();
 } elseif ($dir_option && !checkForAppConfig($app_dir)) {
