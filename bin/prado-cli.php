@@ -26,10 +26,10 @@ restore_exception_handler();
 
 function checkForAppConfig($path)
 {
-	if (false !== ($xml = realpath($path . DIRECTORY_SEPARATOR  . 'application.xml')) && is_file($xml)) {
+	if (false !== ($xml = realpath($path . DIRECTORY_SEPARATOR . 'application.xml')) && is_file($xml)) {
 		return true;
 	}
-	if (false !== ($php = realpath($path . DIRECTORY_SEPARATOR  . 'application.php')) && is_file($php)) {
+	if (false !== ($php = realpath($path . DIRECTORY_SEPARATOR . 'application.php')) && is_file($php)) {
 		return true;
 	}
 	return false;
@@ -38,11 +38,11 @@ function checkForAppConfig($path)
 $found = false;
 
 //check internal composer vendor for application
-if(!checkForAppConfig($app_dir = dirname(__DIR__, 4))) {
+if (!checkForAppConfig($app_dir = dirname(__DIR__, 4))) {
 	//check current working directory for application
-	if(!checkForAppConfig($app_dir = getcwd())) {
+	if (!checkForAppConfig($app_dir = getcwd())) {
 		//check current working directory . '/protected' for application
-		if(checkForAppConfig($app_dir .= DIRECTORY_SEPARATOR  . 'protected')) {
+		if (checkForAppConfig($app_dir .= DIRECTORY_SEPARATOR . 'protected')) {
 			$found = true;
 		}
 	} else {
