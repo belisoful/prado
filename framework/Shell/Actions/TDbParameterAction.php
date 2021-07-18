@@ -51,7 +51,7 @@ class TDbParameterAction extends TShellAction
 	 */
 	public function setAll($value)
 	{
-		$this->_allParams = !TPropertyValue::ensureBoolean($value === '' ? true : $value);
+		$this->_allParams = TPropertyValue::ensureBoolean($value === '' ? true : $value);
 	}
 	
 	/**
