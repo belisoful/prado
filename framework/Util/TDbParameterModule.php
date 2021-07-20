@@ -136,6 +136,11 @@ class TDbParameterModule extends TModule implements IDbModule, IPermissions
 	private $_autoCreate = true;
 	
 	/**
+	 * @var bool whether ensureTable was called
+	 */	
+	private $_ensureTable;
+		
+	/**
 	 * @var callable|string which serialize function to use,
 	 */
 	private $_serializer = self::SERIALIZE_PHP;
@@ -296,16 +301,19 @@ class TDbParameterModule extends TModule implements IDbModule, IPermissions
 	 */
 	protected function ensureTable()
 	{
-		$db = $this->getDbConnection();
-		$sql = 'SELECT * FROM ' . $this->_tableName . ' WHERE 0=1';
-		try {
-			$db->createCommand($sql)->query()->close();
-		} catch (Exception $e) {
-			// DB table not exists
-			if ($this->_autoCreate) {
-				$this->createDbTable();
-			} else {
-				throw new TConfigurationException('dbparametermodule_table_nonexistent', $this->_tableName);
+		if (!$this->_ensureTable) {
+			$this->_ensureTable = true;
+			$db = $this->getDbConnection();
+			$sql = 'SELECT * FROM ' . $this->_tableName . ' WHERE 0=1';
+			try {
+				$db->createCommand($sql)->query()->close();
+			} catch (Exception $e) {
+				// DB table not exists
+				if ($this->_autoCreate) {
+					$this->createDbTable();
+				} else {
+					throw new TConfigurationException('dbparametermodule_table_nonexistent', $this->_tableName);
+				}
 			}
 		}
 	}
