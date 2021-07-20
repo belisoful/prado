@@ -407,8 +407,7 @@ class TPermissionsAction extends TShellAction
 	
 	/**
 	 * get the TPermissionsManager from the Application
-	 * @param mixed $manager
-	 * @return Prado\Security\Permissions\TPermissionsManager
+	 * @param Prado\Security\Permissions\TPermissionsManager $manager
 	 */
 	public function setPermissionsManager($manager)
 	{
