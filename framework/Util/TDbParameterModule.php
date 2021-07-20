@@ -137,7 +137,7 @@ class TDbParameterModule extends TModule implements IDbModule, IPermissions
 	
 	/**
 	 * @var bool whether ensureTable was called
-	 */	
+	 */
 	private $_ensureTable;
 		
 	/**
