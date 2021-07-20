@@ -138,7 +138,7 @@ class TDbParameterModule extends TModule implements IDbModule, IPermissions
 	/**
 	 * @var bool whether ensureTable was called
 	 */
-	private $_ensureTable;
+	private $_tableEnsured;
 		
 	/**
 	 * @var callable|string which serialize function to use,
@@ -245,7 +245,7 @@ class TDbParameterModule extends TModule implements IDbModule, IPermissions
 	public function registerShellAction($sender, $param)
 	{
 		if ($this->dyRegisterShellAction(false) !== true && ($app = $this->getApplication())->isa('Prado\\Shell\\TShellApplication')) {
-			$app->addShellActionClass('Prado\\Shell\\Actions\\TDbParameterAction');
+			$app->addShellActionClass(['class' => 'Prado\\Shell\\Actions\\TDbParameterAction', 'DbParameterModule' => $this]);
 		}
 	}
 	
@@ -301,19 +301,20 @@ class TDbParameterModule extends TModule implements IDbModule, IPermissions
 	 */
 	protected function ensureTable()
 	{
-		if (!$this->_ensureTable) {
-			$this->_ensureTable = true;
-			$db = $this->getDbConnection();
-			$sql = 'SELECT * FROM ' . $this->_tableName . ' WHERE 0=1';
-			try {
-				$db->createCommand($sql)->query()->close();
-			} catch (Exception $e) {
-				// DB table not exists
-				if ($this->_autoCreate) {
-					$this->createDbTable();
-				} else {
-					throw new TConfigurationException('dbparametermodule_table_nonexistent', $this->_tableName);
-				}
+		if ($this->_tableEnsured) {
+			return;
+		}
+		$this->_tableEnsured = true;
+		$db = $this->getDbConnection();
+		$sql = 'SELECT * FROM ' . $this->_tableName . ' WHERE 0=1';
+		try {
+			$db->createCommand($sql)->query()->close();
+		} catch (Exception $e) {
+			// DB table not exists
+			if ($this->_autoCreate) {
+				$this->createDbTable();
+			} else {
+				throw new TConfigurationException('dbparametermodule_table_nonexistent', $this->_tableName);
 			}
 		}
 	}

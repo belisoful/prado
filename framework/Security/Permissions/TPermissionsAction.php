@@ -396,9 +396,10 @@ class TPermissionsAction extends TShellAction
 	{
 		if ($this->_manager === false) {
 			$this->_manager = null;
-			foreach (Prado::getApplication()->getModulesByType('Prado\\Security\\Permissions\\TPermissionsManager') as $module) {
-				if ($module) {
-					$this->_manager = $module;
+			$app = Prado::getApplication();
+			foreach ($app->getModulesByType('Prado\\Security\\Permissions\\TPermissionsManager') as $id => $module) {
+				if ($this->_manager = $app->getModule($id)) {
+					break;
 				}
 			}
 		}
