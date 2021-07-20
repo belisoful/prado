@@ -500,11 +500,11 @@ class TPermissionsManagerTest extends PHPUnit\Framework\TestCase
 	
 	public function testGetPermissionRules()
 	{
-		self::assertEquals([], $this->obj->getPermissionRules());
+		self::assertEquals([], $this->obj->getPermissionRules(null));
 		self::assertNull($this->obj->getPermissionRules(TPermissionsManager::PERM_PERMISSIONS_MANAGE_ROLES));
 		
 		$this->obj->init(null);
-		self::assertEquals([TPermissionsManager::PERM_PERMISSIONS_MANAGE_ROLES, TPermissionsManager::PERM_PERMISSIONS_MANAGE_RULES], array_keys($this->obj->getPermissionRules()));
+		self::assertEquals([TPermissionsManager::PERM_PERMISSIONS_SHELL, TPermissionsManager::PERM_PERMISSIONS_MANAGE_ROLES, TPermissionsManager::PERM_PERMISSIONS_MANAGE_RULES], array_keys($this->obj->getPermissionRules(null)));
 		self::assertNotNull($rules = $this->obj->getPermissionRules(TPermissionsManager::PERM_PERMISSIONS_MANAGE_ROLES));
 		self::assertInstanceOf('Prado\\Security\\TAuthorizationRuleCollection', $rules);
 		self::assertEquals(2, count($rules));
@@ -513,10 +513,10 @@ class TPermissionsManagerTest extends PHPUnit\Framework\TestCase
 	public function testSuperRoles()
 	{
 		$this->obj->setSuperRoles($v = 'Administrator, Manager, Developer');
-		self::assertEquals(['administrator', 'manager', 'developer'], $this->obj->getSuperRoles());
+		self::assertEquals(['Administrator', 'Manager', 'Developer'], $this->obj->getSuperRoles());
 		
 		$this->obj->setSuperRoles($v = ['Admin', 'Supervisor', 'Dev']);
-		self::assertEquals(['admin', 'supervisor', 'dev'], $this->obj->getSuperRoles());
+		self::assertEquals(['Admin', 'Supervisor', 'Dev'], $this->obj->getSuperRoles());
 		
 		$this->obj->init(null);
 		// throw TInvalidOperationException after initialize

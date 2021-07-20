@@ -51,15 +51,15 @@ use Prado\Xml\TXmlElement;
  *	<role name="cron_shell" children="cron_add_task, cron_update_task, cron_remove_task" />
  *	<role name="cron" children="cron_shell, cron_manage_log, cron_add_task, cron_update_task, cron_remove_task" />
  *  <role name="Default" children="register_user, blog_read_posts, blog_comment">
- *	<permissionRule name="param_shell_permission" action="deny" users="*" roles="" verb="*" IPs="" />
- *	<permissionRule name="cron_shell" action="allow" users="*" roles="Developer,cron_shell,cron_manage_log" verb="*" IPs="" />
- *	<permissionRule name="register_user" action="allow" users="?" />
- *	<permissionRule name="register_user" action="allow" roles="Manager" />
- *	<permissionRule name="change_profile" action="deny" users="?" priority="0" />
- *	<permissionRule name="blog_update_posts" class="Prado\Security\Permissions\TUserOwnerRule" Priority="5" />
- *	<permissionRule name="cron" action="allow" users="admin, user1, user2" roles="*" verb="*" IPs="*"  />
- *	<permissionRule name="blog_*" action="allow" users="admin, user1, user2" roles="*" verb="*" IPs="*"  />
- *	<permissionRule name="*" action="deny" priority="1000" />
+ *	<permissionrule name="param_shell_permission" action="deny" users="*" roles="" verb="*" IPs="" />
+ *	<permissionrule name="cron_shell" action="allow" users="*" roles="Developer,cron_shell,cron_manage_log" verb="*" IPs="" />
+ *	<permissionrule name="register_user" action="allow" users="?" />
+ *	<permissionrule name="register_user" action="allow" roles="Manager" />
+ *	<permissionrule name="change_profile" action="deny" users="?" priority="0" />
+ *	<permissionrule name="blog_update_posts" class="Prado\Security\Permissions\TUserOwnerRule" Priority="5" />
+ *	<permissionrule name="cron" action="allow" users="admin, user1, user2" roles="*" verb="*" IPs="*"  />
+ *	<permissionrule name="blog_*" action="allow" users="admin, user1, user2" roles="*" verb="*" IPs="*"  />
+ *	<permissionrule name="*" action="deny" priority="1000" />
  * </module>
  * </code>
  *
@@ -134,6 +134,7 @@ use Prado\Xml\TXmlElement;
  *
  * @author Brad Anderson <belisoful@icloud.com>
  * @package Prado\Security\Permissions
+ * @method bool dyRegisterShellAction($returnValue)
  * @method bool dyAddRoleChildren(bool $return, string $role, string[] $children)
  * @method bool dyRemoveRoleChildren(bool $return, string $role, string[] $children)
  * @method bool dyAddPermissionRule(bool $return, string $permission, \Prado\Security\TAuthorizationRule $rule)
@@ -147,6 +148,8 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	public const USER_PERMISSIONS_BEHAVIOR = 'usercan';
 	
 	public const PERMISSIONS_CONFIG_BEHAVIOR = 'permissionsConfig';
+	
+	public const PERM_PERMISSIONS_SHELL = 'permissions_shell';
 	
 	public const PERM_PERMISSIONS_MANAGE_ROLES = 'permissions_manage_roles';
 	
@@ -206,6 +209,7 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	public function getPermissions($manager)
 	{
 		return [
+			new TPermissionEvent(static::PERM_PERMISSIONS_SHELL, 'Activates permissions shell commands.', 'dyRegisterShellAction'),
 			new TPermissionEvent(static::PERM_PERMISSIONS_MANAGE_ROLES, 'Manages Db Permissions Role Children.', ['dyAddRoleChildren', 'dyRemoveRoleChildren']),
 			new TPermissionEvent(static::PERM_PERMISSIONS_MANAGE_RULES, 'Manages Db Permissions Rules.', ['dyAddPermissionRule', 'dyRemovePermissionRule'])
 		];
@@ -216,9 +220,9 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	 */
 	public function init($config)
 	{
+		$app = $this->getApplication();
 		if (is_string($this->_dbParameter)) {
-			$application = $this->getApplication();
-			if (($dbParameter = $application->getModule($this->_dbParameter)) === null) {
+			if (($dbParameter = $app->getModule($this->_dbParameter)) === null) {
 				throw new TConfigurationException('permissions_dbparameter_nonexistent', $this->_dbParameter);
 			}
 			if (!($dbParameter instanceof TDbParameterModule)) {
@@ -252,9 +256,11 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 			$this->loadPermissionsData($this->_dbParameter->get($this->_parameter));
 		}
 		
-		foreach ($this->getSuperRoles() ?? [] as $role) {
+		foreach (array_map('strtolower', $this->getSuperRoles() ?? []) as $role) {
 			$this->_hierarchy[$role] = array_merge(['all'], $this->_hierarchy[$role] ?? []);
 		}
+		
+		$app->attachEventHandler('onAuthenticationComplete', [$this, 'registerShellAction']);
 		
 		parent::init($config);
 	}
@@ -461,6 +467,17 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	}
 	
 	/**
+	 * @param object $sender sender of this event handler
+	 * @param null|mixed $param parameter for the event
+	 */
+	public function registerShellAction($sender, $param)
+	{
+		if ($this->dyRegisterShellAction(false) !== true && ($app = $this->getApplication())->isa('Prado\\Shell\\TShellApplication')) {
+			$app->addShellActionClass('Prado\\Security\\Permissions\\TPermissionsAction');
+		}
+	}
+	
+	/**
 	 * checks if the $permission is in the $roles hierarchy.
 	 * @param string[] $roles the roles to check the permission
 	 * @param string $permission the permission-role being checked for in the hierarchy
@@ -498,6 +515,9 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	 */
 	public function getDbConfigRoles()
 	{
+		if (!$this->_dbParameter || !$this->_parameter) {
+			return [];
+		}
 		$runtimeData = $this->_dbParameter->get($this->_parameter) ?? [];
 		return $runtimeData['roles'] ?? [];
 	}
@@ -508,6 +528,9 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	 */
 	public function getDbConfigPermissionRules()
 	{
+		if (!$this->_dbParameter || !$this->_parameter) {
+			return [];
+		}
 		$runtimeData = $this->_dbParameter->get($this->_parameter) ?? [];
 		return $runtimeData['permissionrules'] ?? [];
 	}
@@ -522,7 +545,7 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	 */
 	public function addRoleChildren($role, $children)
 	{
-		if ($this->dyAddRoleChildren(false, $role, $children) || !$this->_dbParameter) {
+		if ($this->dyAddRoleChildren(false, $role, $children) === true || !$this->_dbParameter) {
 			return false;
 		}
 		if (is_string($children)) {
@@ -536,7 +559,7 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 		
 		$runtimeData = $this->_dbParameter->get($this->_parameter) ?? [];
 		$runtimeData['roles'] = $runtimeData['roles'] ?? [];
-		$runtimeData['roles'][$role] = array_merge($runtimeData['roles'][$role] ?? [], $children);
+		$runtimeData['roles'][$role] = array_unique(array_merge($runtimeData['roles'][$role] ?? [], $children));
 		$this->_dbParameter->set($this->_parameter, $runtimeData);
 		
 		return true;
@@ -552,7 +575,7 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	 */
 	public function removeRoleChildren($role, $children)
 	{
-		if ($this->dyRemoveRoleChildren(false, $role, $children) || !$this->_dbParameter) {
+		if ($this->dyRemoveRoleChildren(false, $role, $children) === true || !$this->_dbParameter) {
 			return false;
 		}
 		if (is_string($children)) {
@@ -586,7 +609,7 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	{
 		$permission = strtolower($permission);
 		
-		if ($this->dyAddPermissionRule(false, $permission, $rule) || !$this->_dbParameter) {
+		if ($this->dyAddPermissionRule(false, $permission, $rule) === true || !$this->_dbParameter) {
 			return false;
 		}
 		$this->addPermissionRuleInternal($permission, $rule);
@@ -609,7 +632,7 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	{
 		$permission = strtolower($permission);
 		
-		if ($this->dyRemovePermissionRule(false, $permission, $rule) || !$this->_dbParameter) {
+		if ($this->dyRemovePermissionRule(false, $permission, $rule) === true || !$this->_dbParameter) {
 			return false;
 		}
 		
@@ -624,6 +647,8 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 		unset($runtimeData['permissionrules'][$permission][$index]);
 		if (!$runtimeData['permissionrules'][$permission]) {
 			unset($runtimeData['permissionrules'][$permission]);
+		} else {
+			$runtimeData['permissionrules'][$permission] = array_values($runtimeData['permissionrules'][$permission]);
 		}
 		$this->_dbParameter->set($this->_parameter, $runtimeData);
 		
@@ -646,6 +671,9 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	 */
 	public function getHierarchyRoleChildren($role)
 	{
+		if (!$role) {
+			return $this->_hierarchy;
+		}
 		return $this->_hierarchy[strtolower(TPropertyValue::ensureString($role))] ?? null;
 	}
 	
@@ -653,7 +681,7 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	 * @param null|string $permission
 	 * @return null|array<string, TAuthorizationRuleCollection>|TAuthorizationRuleCollection
 	 */
-	public function getPermissionRules($permission = null)
+	public function getPermissionRules($permission)
 	{
 		if (is_string($permission)) {
 			return $this->_permissionRules[strtolower($permission)] ?? null;
@@ -682,9 +710,9 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 			throw new TInvalidOperationException('permissions_property_unchangeable', 'SuperRoles');
 		}
 		if (!is_array($roles)) {
-			$roles = array_filter(array_map('trim', explode(',', $roles)));
+			$roles = array_map('trim', explode(',', $roles));
 		}
-		$this->_superRoles = array_map('strtolower', $roles);
+		$this->_superRoles = array_filter($roles);
 		;
 	}
 	
@@ -853,7 +881,7 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 		if ($this->_initialized) {
 			throw new TInvalidOperationException('permissions_property_unchangeable', 'DbParameter');
 		}
-		if (!is_string($provider) && !($provider instanceof TDbParameterModule)) {
+		if ($provider !== null && !is_string($provider) && !($provider instanceof TDbParameterModule)) {
 			throw new TConfigurationException('permissions_dbparameter_invalid', is_object($provider) ? get_class($provider) : $provider);
 		}
 		$this->_dbParameter = $provider;

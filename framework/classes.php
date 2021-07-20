@@ -216,6 +216,7 @@ return [
 'IUserManager' => 'Prado\Security\IUserManager',
 'IPermissions' => 'Prado\Security\Permissions\IPermissions',
 'TPermissionEvent' => 'Prado\Security\Permissions\TPermissionEvent',
+'TPermissionAction' => 'Prado\Security\Permissions\TPermissionsAction',
 'TPermissionsBehavior' => 'Prado\Security\Permissions\TPermissionsBehavior',
 'TPermissionsConfigurationBehavior' => 'Prado\Security\Permissions\TPermissionsConfigurationBehavior',
 'TPermissionsManager' => 'Prado\Security\Permissions\TPermissionsManager',

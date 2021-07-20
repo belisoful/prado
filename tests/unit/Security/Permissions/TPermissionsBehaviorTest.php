@@ -74,7 +74,7 @@ class TPermissionsBehaviorTest extends PHPUnit\Framework\TestCase
 		$manager->attachBehavior('permissions', $this->behavior);
 		
 		//Test attach
-		self::assertEquals(2,count($this->behavior->getPermissionEvents()));
+		self::assertEquals(3,count($this->behavior->getPermissionEvents()));
 		self::assertInstanceOf('Prado\\Security\\Permissions\\TPermissionEvent', $manager->getPermissionEvents()[0]);
 		self::assertEquals(2, count($manager->getPermissionRules($permission)));
 		
