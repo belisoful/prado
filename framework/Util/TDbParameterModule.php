@@ -332,6 +332,8 @@ class TDbParameterModule extends TModule implements IDbModule, IPermissions
 				return $appParams[$key];
 			}
 		}
+		$this->ensureTable();
+		
 		$db = $this->getDbConnection();
 		$cmd = $db->createCommand(
 			"SELECT {$this->_valueField} as valueField FROM {$this->_tableName} WHERE {$this->_keyField}=:key LIMIT 1"
@@ -397,6 +399,7 @@ class TDbParameterModule extends TModule implements IDbModule, IPermissions
 				$_value = call_user_func($serializer, $value, true);
 			}
 		}
+		$this->ensureTable();
 		$db = $this->getDbConnection();
 		$driver = $db->getDriverName();
 		$appendix = '';
@@ -450,6 +453,8 @@ class TDbParameterModule extends TModule implements IDbModule, IPermissions
 	 */
 	public function exists($key)
 	{
+		$this->ensureTable();
+		
 		$db = $this->getDbConnection();
 		$cmd = $db->createCommand(
 			"SELECT COUNT(*) AS count FROM {$this->_tableName} WHERE {$this->_keyField}=:key"
@@ -469,6 +474,8 @@ class TDbParameterModule extends TModule implements IDbModule, IPermissions
 	public function remove($key)
 	{
 		$value = $this->get($key, false, false);
+		
+		$this->ensureTable();
 		$db = $this->getDbConnection();
 		$driver = $db->getDriverName();
 		$appendix = '';
