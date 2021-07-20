@@ -277,6 +277,12 @@ class TPermissionsActionTest extends PHPUnit\Framework\TestCase
 		self::assertEquals(1, count($rules));
 		self::assertEquals(1, count($rules['perm_name']));
 		self::assertEquals(333, $rules['perm_name'][0]->getPriority());
+		
+		self::assertTrue($this->obj->actionRemoveRule(['perm/remove-rule', 'perm_name', '0']));
+		self::assertTrue(is_numeric(stripos($text = $this->writer->flush(), "Success")));
+		self::assertTrue(is_numeric(stripos($text, "perm_name")));
+		self::assertTrue(is_numeric(stripos($text, "perm_name")));
+		
 	}
 	
 	public function testPermissionsManager()
