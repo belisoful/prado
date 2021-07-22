@@ -1,6 +1,6 @@
 <?php
 /**
- * TTimeAgo class file
+ * TTimeDelta class file
  *
  * @author Brad Anderson <belisoful@icloud.com>
  * @link https://github.com/pradosoft/prado
@@ -15,7 +15,7 @@ use Prado\TPropertyValue;
 use Prado\Web\Javascripts\TJavaScript;
 
 /**
- * TTimeAgo class
+ * TTimeDelta class
  *
  * TimeAgo is shows time and date in a label as '(# seconds|minutes|hours|etc) ago'.  This
  * embeds javascript to keep the TTimeAgo up to date.  As time changes,
@@ -28,8 +28,107 @@ use Prado\Web\Javascripts\TJavaScript;
  * @since 4.2.0
  */
 
-class TTimeAgo extends TLabel
+class TTimeDelta extends TLabel
 {
+	protected function getDurationData()
+	{
+		if (($style = strtolower($this->getStyle())) === 'full') {
+			$data = [
+				'year' => [
+					'one' => '{0} year',
+					'other' => '{0} years'
+				],
+				'month' => [
+					'one' => '{0} month',
+					'other' => '{0} months'
+				],
+				'week' => [
+					'one' => '{0} week',
+					'other' => '{0} weeks'
+				],
+				'day' => [
+					'one' => '{0} day',
+					'other' => '{0} days'
+				],
+				'hour' => [
+					'one' => '{0} hour',
+					'other' => '{0} hours'
+				],
+				'minute' => [
+					'one' => '{0} minute',
+					'other' => '{0} minutes'
+				],
+				'second' => [
+					'one' => '{0} second',
+					'other' => '{0} seconds'
+				]
+			];
+		} elseif ($style === 'short') {
+			$data = [
+				'year' => [
+					'one' => '{0} yr',
+					'other' => '{0} yrs'
+				],
+				'month' => [
+					'one' => '{0} mth',
+					'other' => '{0} mths'
+				],
+				'week' => [
+					'one' => '{0} wk',
+					'other' => '{0} wks'
+				],
+				'day' => [
+					'one' => '{0} day',
+					'other' => '{0} days'
+				],
+				'hour' => [
+					'one' => '{0} hr',
+					'other' => '{0} hr'
+				],
+				'minute' => [
+					'one' => '{0} min',
+					'other' => '{0} min'
+				],
+				'second' => [
+					'one' => '{0} sec',
+					'other' => '{0} sec'
+				]
+			];
+		} elseif ($style === 'narrow') {
+			$data = [
+				'year' => [
+					'one' => '{0}y',
+					'other' => '{0}y'
+				],
+				'month' => [
+					'one' => '{0}m',
+					'other' => '{0}m'
+				],
+				'week' => [
+					'one' => '{0}w',
+					'other' => '{0}w'
+				],
+				'day' => [
+					'one' => '{0}d',
+					'other' => '{0}d'
+				],
+				'hour' => [
+					'one' => '{0}h',
+					'other' => '{0}h'
+				],
+				'minute' => [
+					'one' => '{0}m',
+					'other' => '{0}m'
+				],
+				'second' => [
+					'one' => '{0}s',
+					'other' => '{0}s'
+				]
+			];
+		}
+		return $data;
+	}
+	
 	/**
 	 * Adds attribute name-value pairs to renderer.
 	 * This overrides the parent implementation with additional button specific attributes.
@@ -64,7 +163,7 @@ class TTimeAgo extends TLabel
 		$options = TJavaScript::encode($this->getClientOptions());
 		$className = $this->getClientClassName();
 		$cs = $this->getPage()->getClientScript();
-		$cs->registerPradoScript('timeago');
+		$cs->registerPradoScript('timedelta');
 		$cs->registerEndScript('prado:' . $this->getClientID(), "new $className($options);");
 	}
 
@@ -75,7 +174,7 @@ class TTimeAgo extends TLabel
 	 */
 	protected function getClientClassName()
 	{
-		return 'Prado.WebUI.TTimeAgo';
+		return 'Prado.WebUI.TTimeDelta';
 	}
 
 	/**
@@ -87,48 +186,19 @@ class TTimeAgo extends TLabel
 		$options['ServerTime'] = time();
 		$options['OriginTime'] = $this->getTimeStamp();
 		$options['ClickToChange'] = $this->getClickSeeDateTime();
-		$options['UseRawTime'] = $this->getUseRawTime();
+		$options['Compensate'] = $this->getCompensateUserTime();
+		$options['Separator'] = $this->getSeparator();
 		
-		$lang = [
-			'second' => Prado::localize('{0} second ago'),
-			'seconds' => Prado::localize('{0} seconds ago'),
-			
-			'minute' => Prado::localize('{0} minute ago'),
-			'minutesecond' => Prado::localize('{0} minute {1} second ago'),
-			'minuteseconds' => Prado::localize('{0} minute {1} seconds ago'),
-			'minutes' => Prado::localize('{0} minutes ago'),
-			'minutessecond' => Prado::localize('{0} minutes {1} second ago'),
-			'minutesseconds' => Prado::localize('{0} minutes {1} seconds ago'),
-			
-			'hour' => Prado::localize('{0} hour ago'),
-			'hourminute' => Prado::localize('{0} hour {1} minute ago'),
-			'hourminutes' => Prado::localize('{0} hour {1} minutes ago'),
-			'hours' => Prado::localize('{0} hours ago'),
-			'hoursminute' => Prado::localize('{0} hours {1} minute ago'),
-			'hoursminutes' => Prado::localize('{0} hours {1} minutes ago'),
-			
-			'day' => Prado::localize('{0} day ago'),
-			'dayhour' => Prado::localize('{0} day {1} hour ago'),
-			'dayhours' => Prado::localize('{0} day {1} hours ago'),
-			'days' => Prado::localize('{0} days ago'),
-			'dayshour' => Prado::localize('{0} days {1} hour ago'),
-			'dayshours' => Prado::localize('{0} days {1} hours ago'),
-			
-			'week' => Prado::localize('{0} week ago'),
-			'weekday' => Prado::localize('{0} week {1} day ago'),
-			'weekdays' => Prado::localize('{0} week {1} days ago'),
-			'weeks' => Prado::localize('{0} weeks ago'),
-			'weeksday' => Prado::localize('{0} weeks {1} day ago'),
-			'weeksdays' => Prado::localize('{0} weeks {1} days ago'),
-			
-			'month' => Prado::localize('{0} month ago'),
-			'monthweek' => Prado::localize('{0} month {1} week ago'),
-			'monthweeks' => Prado::localize('{0} month {1} weeks ago'),
-			'months' => Prado::localize('{0} months ago'),
-			'monthsweek' => Prado::localize('{0} months {1} week ago'),
-			'monthsweeks' => Prado::localize('{0} months {1} weeks ago')
-		];
-		$options['Localize'] = $lang;
+		$local = $this->getDurationData();
+		$options['LocalizeStrings'] = [
+			'year' => $local['year'],
+			'month' => $local['month'],
+			'week' => $local['week'],
+			'day' => $local['day'],
+			'hour' => $local['hour'],
+			'minute' => $local['minute'],
+			'second' => $local['second']
+		];;
 		return $options;
 	}
 	
@@ -170,13 +240,53 @@ class TTimeAgo extends TLabel
 		$this->setViewState('clicksee', TPropertyValue::ensureBoolean($v));
 	}
 	
-	public function getUseRawTime()
+	public function getCompensateUserTime()
 	{
-		return $this->getViewState('userawtime', true);
+		return $this->getViewState('compensate', true);
 	}
-	public function setUseRawTime($v)
+	public function setCompensateUserTime($v)
 	{
-		$this->setViewState('userawtime', TPropertyValue::ensureBoolean($v));
+		$this->setViewState('compensate', TPropertyValue::ensureBoolean($v));
+	}
+	
+	/**
+	 * The separator between components of a time delta
+	 * @return string separator between time delta components
+	 */
+	public function getSeparator()
+	{
+		return $this->getViewState('separator', ' ');
+	}
+	
+	/**
+	 * The separator between components of a time delta
+	 * @param string $separator separator between time delta components
+	 */
+	public function setSeparator($separator)
+	{
+		$this->setViewState('separator', TPropertyValue::ensureString($separator));
+	}
+	
+	/**
+	 * The separator between components of a time delta
+	 * @return string separator between time delta components
+	 */
+	public function getStyle()
+	{
+		return $this->getViewState('style', 'Short');
+	}
+	
+	/**
+	 * The separator between components of a time delta
+	 * @param string $style separator between time delta components
+	 */
+	public function setStyle($style)
+	{
+		$style = TPropertyValue::ensureString($style);
+		if (!in_array(strtolower($style), ['full', 'short', 'narrow'])) {
+			throw new TInvalidDataValueException('timedelta_bad_style', $style);
+		}
+		$this->setViewState('style', $style);
 	}
 	
 	public function getTimeStamp()

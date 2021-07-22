@@ -670,7 +670,7 @@ return [
 'TTextBoxMode' => 'Prado\Web\UI\WebControls\TTextBoxMode',
 'TTextHighlighter' => 'Prado\Web\UI\WebControls\TTextHighlighter',
 'TTextProcessor' => 'Prado\Web\UI\WebControls\TTextProcessor',
-'TTimeAgo' => 'Prado\Web\UI\WebControls\TTimeAgo',
+'TTimeDelta' => 'Prado\Web\UI\WebControls\TTimeDelta',
 'TValidationCompareOperator' => 'Prado\Web\UI\WebControls\TValidationCompareOperator',
 'TValidationDataType' => 'Prado\Web\UI\WebControls\TValidationDataType',
 'TValidationSummary' => 'Prado\Web\UI\WebControls\TValidationSummary',
