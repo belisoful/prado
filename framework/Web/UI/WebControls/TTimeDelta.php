@@ -198,7 +198,8 @@ class TTimeDelta extends TLabel
 			'hour' => $local['hour'],
 			'minute' => $local['minute'],
 			'second' => $local['second']
-		];;
+		];
+		;
 		return $options;
 	}
 	
