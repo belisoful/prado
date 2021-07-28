@@ -356,8 +356,7 @@ class TTimeDelta extends TLabel
 	/**
 	 * When the time is within a certain number of minutes, also show the seconds.
 	 * This works when PartialElement is true.
-	 * @param mixed $minutes
-	 * @return int $minutes number of minutes.
+	 * @param int $minutes number of minutes.
 	 */
 	public function setMinutesWithSeconds($minutes)
 	{
@@ -377,8 +376,7 @@ class TTimeDelta extends TLabel
 	/**
 	 * When the time is within a certain number of hours, also show the minutes.
 	 * This works when PartialElement is true.
-	 * @param mixed $hours
-	 * @return int $hours number of hours.
+	 * @param int $hours number of hours.
 	 */
 	public function setHoursWithMinutes($hours)
 	{
@@ -398,8 +396,7 @@ class TTimeDelta extends TLabel
 	/**
 	 * When the time is within a certain number of days, also show the hours.
 	 * This works when PartialElement is true.
-	 * @param mixed $days
-	 * @return int $days number of days.
+	 * @param int $days number of days.
 	 */
 	public function setDaysWithHours($days)
 	{
@@ -419,8 +416,7 @@ class TTimeDelta extends TLabel
 	/**
 	 * When the time is within a certain number of weeks, also show the days.
 	 * This works when PartialElement is true.
-	 * @param mixed $weeks
-	 * @return int $weeks number of weeks.
+	 * @param int $weeks number of weeks.
 	 */
 	public function setWeeksWithDays($weeks)
 	{
@@ -440,8 +436,7 @@ class TTimeDelta extends TLabel
 	/**
 	 * When the time is within a certain number of months, also show the weeks.
 	 * This works when PartialElement is true.
-	 * @param mixed $months
-	 * @return int $months number of months.
+	 * @param int $months number of months.
 	 */
 	public function setMonthsWithWeeks($months)
 	{
@@ -461,8 +456,7 @@ class TTimeDelta extends TLabel
 	/**
 	 * When the time is within a certain number of years, also show the months.
 	 * This works when PartialElement is true.
-	 * @param mixed $years
-	 * @return int $years number of years.
+	 * @param int $years number of years.
 	 */
 	public function setYearsWithMonths($years)
 	{
