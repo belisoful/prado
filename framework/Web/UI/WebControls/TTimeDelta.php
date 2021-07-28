@@ -13,14 +13,14 @@ namespace Prado\Web\UI\WebControls;
 use Prado\Prado;
 use Prado\TPropertyValue;
 use Prado\Web\Javascripts\TJavaScript;
+use Prado\Exceptions\TInvalidDataValueException;
 
 /**
  * TTimeDelta class
  *
- * TimeAgo is shows time and date in a label as '(# seconds|minutes|hours|etc) ago'.  This
- * embeds javascript to keep the TTimeAgo up to date.  As time changes,
- * the TTimeAgo is kept up to date.  The resolution depends on how far ago
- * the moment is.
+ * TTimeDelta is shows time difference in a label as '(# seconds|minutes|hours|etc)'.  This
+ * embeds javascript to keep the TTimeDelta up to date.  PartialElement enables displaying
+ * the following element when time is getting close to changing the first significant element.
  *
  * When clicking on a time ago label, the entry turns into the date and time stamp for specifics.
  * @author Brad Anderson <belisoful@icloud.com>
@@ -32,7 +32,8 @@ class TTimeDelta extends TLabel
 {
 	protected function getDurationData()
 	{
-		if (($style = strtolower($this->getStyle())) === 'full') {
+		$data = [];
+		if (($style = $this->getStyle()) === 'full') {
 			$data = [
 				'year' => [
 					'one' => '{0} year',
@@ -126,6 +127,7 @@ class TTimeDelta extends TLabel
 				]
 			];
 		}
+		
 		return $data;
 	}
 	
@@ -182,12 +184,25 @@ class TTimeDelta extends TLabel
 	 */
 	protected function getClientOptions()
 	{
+		$sigelements = $this->getSignificantElements();
 		$options['ID'] = $this->getClientID();
 		$options['ServerTime'] = time();
 		$options['OriginTime'] = $this->getTimeStamp();
 		$options['ClickToChange'] = $this->getClickSeeDateTime();
-		$options['Compensate'] = $this->getCompensateUserTime();
+		$options['UseServerTime'] = $this->getUseServerTime();
 		$options['Separator'] = $this->getSeparator();
+		$options['DisplayZero'] = $this->getDisplayZero();
+		$options['SignificantElements'] = ($sigelements === '*' ? 10 : $sigelements);
+		$options['PartialElement'] = $this->getPartialElement();
+		$options['PartialCount'] = [
+			$this->getYearsWithMonths(),
+			$this->getMonthsWithWeeks(),
+			$this->getWeeksWithDays(),
+			$this->getDaysWithHours(),
+			$this->getHoursWithMinutes(),
+			$this->getMinutesWithSeconds(),
+			5
+		];
 		
 		$local = $this->getDurationData();
 		$options['LocalizeStrings'] = [
@@ -199,7 +214,6 @@ class TTimeDelta extends TLabel
 			'minute' => $local['minute'],
 			'second' => $local['second']
 		];
-		;
 		return $options;
 	}
 	
@@ -241,13 +255,20 @@ class TTimeDelta extends TLabel
 		$this->setViewState('clicksee', TPropertyValue::ensureBoolean($v));
 	}
 	
-	public function getCompensateUserTime()
+	/**
+	 * @return bool whether to use the serve time (or  client time), default true (server time)
+	 */
+	public function getUseServerTime()
 	{
-		return $this->getViewState('compensate', true);
+		return $this->getViewState('useServeTime', true);
 	}
-	public function setCompensateUserTime($v)
+	
+	/**
+	 * @param bool $v whether to use the serve time (or  client time)
+	 */
+	public function setUseServerTime($v)
 	{
-		$this->setViewState('compensate', TPropertyValue::ensureBoolean($v));
+		$this->setViewState('useServeTime', TPropertyValue::ensureBoolean($v));
 	}
 	
 	/**
@@ -269,22 +290,203 @@ class TTimeDelta extends TLabel
 	}
 	
 	/**
-	 * The separator between components of a time delta
-	 * @return string separator between time delta components
+	 * Display units that have zero numeric value.
+	 * @return bool display units that have zero numeric value, default false.
 	 */
-	public function getStyle()
+	public function getDisplayZero()
 	{
-		return $this->getViewState('style', 'Short');
+		return $this->getViewState('displayzero', false);
 	}
 	
 	/**
-	 * The separator between components of a time delta
-	 * @param string $style separator between time delta components
+	 * Display units that have zero numeric value.
+	 * @param bool $display display units that have zero numeric value.
+	 */
+	public function setDisplayZero($display)
+	{
+		$this->setViewState('displayzero', TPropertyValue::ensureBoolean($display));
+	}
+	
+	/**
+	 * The number of significant Elements to display.
+	 * @return int The number of significant Elements to display, default 1.
+	 */
+	public function getSignificantElements()
+	{
+		return $this->getViewState('significantElements', 1);
+	}
+	
+	/**
+	 * The number of significant Elements to display.
+	 * @param bool $sigElements The number of significant Elements to display.
+	 */
+	public function setSignificantElements($sigElements)
+	{
+		$this->setViewState('significantElements', TPropertyValue::ensureInteger($sigElements));
+	}
+	
+	/**
+	 * This allows the control set to one significant element to display
+	 * the next important element when it is close to changing significant elements.
+	 * @return bool display the next significant element when close to changing elements, default true.
+	 */
+	public function getPartialElement()
+	{
+		return $this->getViewState('partialElement', true);
+	}
+	
+	/**
+	 * @param bool $partial display the next significant element when close to changing elements.
+	 */
+	public function setPartialElement($partial)
+	{
+		$this->setViewState('partialElement', TPropertyValue::ensureBoolean($partial));
+	}
+	
+	/**
+	 * When the time is within a certain number of minutes, also show the seconds.
+	 * This works when PartialElement is true.
+	 * @return int number of minutes, default 4.
+	 */
+	public function getMinutesWithSeconds()
+	{
+		return $this->getViewState('minutesWithSeconds', 4);
+	}
+	
+	/**
+	 * When the time is within a certain number of minutes, also show the seconds.
+	 * This works when PartialElement is true.
+	 * @param mixed $minutes
+	 * @return int $minutes number of minutes.
+	 */
+	public function setMinutesWithSeconds($minutes)
+	{
+		$this->setViewState('minutesWithSeconds', TPropertyValue::ensureInteger($minutes));
+	}
+	
+	/**
+	 * When the time is within a certain number of hours, also show the minutes.
+	 * This works when PartialElement is true.
+	 * @return int number of hours, default 3
+	 */
+	public function getHoursWithMinutes()
+	{
+		return $this->getViewState('hoursWithMinutes', 3);
+	}
+	
+	/**
+	 * When the time is within a certain number of hours, also show the minutes.
+	 * This works when PartialElement is true.
+	 * @param mixed $hours
+	 * @return int $hours number of hours.
+	 */
+	public function setHoursWithMinutes($hours)
+	{
+		$this->setViewState('hoursWithMinutes', TPropertyValue::ensureInteger($hours));
+	}
+	
+	/**
+	 * When the time is within a certain number of days, also show the hours.
+	 * This works when PartialElement is true.
+	 * @return int number of days, default 3
+	 */
+	public function getDaysWithHours()
+	{
+		return $this->getViewState('daysWithHours', 3);
+	}
+	
+	/**
+	 * When the time is within a certain number of days, also show the hours.
+	 * This works when PartialElement is true.
+	 * @param mixed $days
+	 * @return int $days number of days.
+	 */
+	public function setDaysWithHours($days)
+	{
+		$this->setViewState('daysWithHours', TPropertyValue::ensureInteger($days));
+	}
+	
+	/**
+	 * When the time is within a certain number of weeks, also show the days.
+	 * This works when PartialElement is true.
+	 * @return int number of weeks, default 2
+	 */
+	public function getWeeksWithDays()
+	{
+		return $this->getViewState('weeksWithDays', 2);
+	}
+	
+	/**
+	 * When the time is within a certain number of weeks, also show the days.
+	 * This works when PartialElement is true.
+	 * @param mixed $weeks
+	 * @return int $weeks number of weeks.
+	 */
+	public function setWeeksWithDays($weeks)
+	{
+		$this->setViewState('weeksWithDays', TPropertyValue::ensureInteger($weeks));
+	}
+	
+	/**
+	 * When the time is within a certain number of months, also show the weeks.
+	 * This works when PartialElement is true.
+	 * @return int number of months, default 3
+	 */
+	public function getMonthsWithWeeks()
+	{
+		return $this->getViewState('monthsWithWeeks', 3);
+	}
+	
+	/**
+	 * When the time is within a certain number of months, also show the weeks.
+	 * This works when PartialElement is true.
+	 * @param mixed $months
+	 * @return int $months number of months.
+	 */
+	public function setMonthsWithWeeks($months)
+	{
+		$this->setViewState('monthsWithWeeks', TPropertyValue::ensureInteger($months));
+	}
+	
+	/**
+	 * When the time is within a certain number of years, also show the months.
+	 * This works when PartialElement is true.
+	 * @return int number of years, default 2
+	 */
+	public function getYearsWithMonths()
+	{
+		return $this->getViewState('yearsWithMonths', 2);
+	}
+	
+	/**
+	 * When the time is within a certain number of years, also show the months.
+	 * This works when PartialElement is true.
+	 * @param mixed $years
+	 * @return int $years number of years.
+	 */
+	public function setYearsWithMonths($years)
+	{
+		$this->setViewState('yearsWithMonths', TPropertyValue::ensureInteger($years));
+	}
+	
+	/**
+	 * The style of the time difference, full is full text, short is short text,
+	 * and narrow is one letter.
+	 * @return string style of the time delta
+	 */
+	public function getStyle()
+	{
+		return $this->getViewState('style', 'short');
+	}
+	
+	/**
+	 * The style of the time delta
+	 * @param string $style style of the time delta
 	 */
 	public function setStyle($style)
 	{
 		$style = TPropertyValue::ensureString($style);
-		if (!in_array(strtolower($style), ['full', 'short', 'narrow'])) {
+		if (!in_array($style = strtolower($style), ['full', 'short', 'narrow'])) {
 			throw new TInvalidDataValueException('timedelta_bad_style', $style);
 		}
 		$this->setViewState('style', $style);

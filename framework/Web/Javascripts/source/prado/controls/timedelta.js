@@ -13,7 +13,7 @@ Prado.WebUI.TTimeDelta = jQuery.klass(Prado.WebUI.Control,
 		this.options = options || {};
 		this.startTime = (new Date()).getTime()/1000;
 		this.showDT = false;
-		this.rerenderTimeout = false;
+		this.loopTimeout = false;
 		this.waitTime = 0;
 		
 		if(this.options.ClickToChange) {
@@ -34,7 +34,7 @@ Prado.WebUI.TTimeDelta = jQuery.klass(Prado.WebUI.Control,
 	drawLoop : function() 
 	{
 		this.render();
-		this.rerenderTimeout = setTimeout(() => {this.drawLoop();}, this.waitTime * 1000);
+		this.loopTimeout = setTimeout(() => {this.drawLoop();}, this.waitTime * 1000);
 	},
 	
 	
@@ -54,7 +54,7 @@ Prado.WebUI.TTimeDelta = jQuery.klass(Prado.WebUI.Control,
 		var current = (new Date()).getTime()/1000;
 		delta = current - this.options.OriginTime;
 		
-		if(this.options.Compensate) {
+		if(this.options.UseServerTime) {
 			delta += this.options.ServerTime - this.startTime;
 		}
 		
@@ -66,13 +66,13 @@ Prado.WebUI.TTimeDelta = jQuery.klass(Prado.WebUI.Control,
 		}
 		
 		timing = [
-			{'type': 'year', 'seconds' : 31556925.1874, 'period': 60*60*24*365.2421896698*2},
-			{'type': 'month', 'seconds' : 2629743.7656, 'period': 12},
-			{'type': 'week', 'seconds' : 604800, 'period': 30.43684913915, 'time' : Math.floor((delta / (60 * 60 * 24)) % 30) },
-			{'type': 'day', 'seconds' : 86400, 'period': 7, 'time' : Math.floor((delta / (60 * 60 * 24)) % 7)},
-			{'type': 'hour', 'seconds' : 3600, 'period': 24, 'time' : Math.floor((delta / (60 * 60)) % 24)},
-			{'type': 'minute', 'seconds' : 60, 'period': 60, 'time' : Math.floor((delta / 60) % 60)},
-			{'type': 'second', 'seconds' : 1, 'period': 60, 'time': Math.floor(delta % 60)}
+			{'type': 'year', 'seconds' : 86400*365.2421896698, 'period': 86400*365.2421896698*2, 'sig' : this.options.PartialCount[0]},
+			{'type': 'month', 'seconds' : 2629743.7656, 'period': 86400*30.43684913915*12, 'sig' : this.options.PartialCount[1]},
+			{'type': 'week', 'seconds' : 604800, 'period': 86400*30.43684913915, 'sig' : this.options.PartialCount[2]},
+			{'type': 'day', 'seconds' : 86400, 'period': 86400*7, 'sig' : this.options.PartialCount[3]},
+			{'type': 'hour', 'seconds' : 3600, 'period': 86400, 'sig' : this.options.PartialCount[4]},
+			{'type': 'minute', 'seconds' : 60, 'period': 3600, 'sig' : this.options.PartialCount[5]},
+			{'type': 'second', 'seconds' : 1, 'period': 60, 'sig' : this.options.PartialCount[6]}
 		];
 		
 		if (delta >= timing[0].period) {
@@ -80,64 +80,42 @@ Prado.WebUI.TTimeDelta = jQuery.klass(Prado.WebUI.Control,
 			date.setTime(this.options.OriginTime * 1000);
 			options = {year: 'numeric', month: 'short'};
 			str = new Intl.DateTimeFormat('default', options).format(date);
-			wait = 3600;
+			this.waitTime = 3600/2;
 		} else {
+			_delta = delta;
+			initialType = false;
+			digits = 0;
+			str = '';
+			importantNextElement = false;
 			for (i = 0; i < timing.length;  i++) {
-				
+				num = Math.floor(_delta / timing[i].seconds);
+				if (num != 0 && initialType == false) {
+					initialType = i;
+				}
+				if (initialType !== false && ((digits < this.options.SignificantElements)
+					|| (this.options.PartialElement && digits == 1 && importantNextElement)
+				)) {
+					if (this.options.DisplayZero || num != 0) {
+						if (str.length != 0) {
+							str += this.options.Separator;
+						}
+						str += this.Localize(timing[i].type, num);
+						_delta -= num * timing[i].seconds;
+					}
+					digits++;
+					importantNextElement = (num <= timing[i].sig);
+					this.waitTime = (_delta % timing[i].seconds);
+					if (!isFuture) {
+						this.waitTime = timing[i].seconds - this.waitTime;
+					}
+				}
 			}
-		}
-		
-		if(delta < 60) {
-			seconds = Math.floor(delta);
-			str = this.Localize('second', seconds);
-			this.waitTime = 1;
-		} else if(delta < 60*60) {
-			minutes = Math.floor(delta/60);
-			seconds = Math.floor(delta - minutes * 60);
-			str = this.Localize('minute', minutes);
-			this.waitTime = 60 - (seconds % 60);
-			if (minutes <= 5) {
-				str += this.options.Separator + this.Localize('second', seconds);
+			if(initialType == false) {
+				str = this.Localize('second', 0);
 				this.waitTime = 1;
 			}
-		} else if(delta < 60*60*24) {
-			hours = Math.floor(delta/(60*60));
-			minutes = Math.floor(delta/60 - hours * 60);
-			str = this.Localize('hour', hours);
-			this.waitTime = (60*60) - (delta % (60*60));
-			if (hours <= 2) {
-				str += this.options.Separator + this.Localize('minute', minutes);
-				this.waitTime = 60 - (seconds % 60);
-			}
-		} else if(delta < 60*60*24*7) {
-			days = Math.floor(delta/(60*60*24));
-			hours = Math.floor(delta/(60*60) - days * 24);
-			str = this.Localize('day', days);
-			this.waitTime = (60*60*24) - (delta % (60*60*24));
-			if (days <= 2) {
-				str += this.options.Separator + this.Localize('hour', hours);
-				this.waitTime = (60*60) - (delta % (60*60));
-			}
-		} else if(delta < 60*60*24*30) {
-			weeks = Math.floor(delta/(60*60*24*7));
-			days = Math.floor(delta/(60*60*24) - weeks * 7);
-			str = this.Localize('week', weeks);
-			this.waitTime = (60*60*24*7) - (delta % (60*60*24*7));
-			if (weeks <= 2) {
-				str += this.options.Separator + this.Localize('day', days);
-				this.waitTime = (60*60*24) - (delta % (60*60*24));
-			}
-		} else if(delta < 60*60*24*365) {
-			months = Math.floor(delta/(60*60*24*30));
-			weeks = Math.floor((delta/(60*60*24) - months * 30) / 7);
-			str = this.Localize('month', months);
-			this.waitTime = (60*60*24*30) - (delta % (60*60*24*30));
-			if (months <= 2) {
-				str += this.options.Separator + this.Localize('week', weeks);
-				this.waitTime = (60*60*24*7) - ((delta % (60*60*24*30)) % (60*60*24*7));
-			}
-		} else {
 		}
+		// the waitTime needs to be computed regardless of showDT
 		if(this.showDT) {
 			date = new Date();
 			date.setTime(this.options.OriginTime * 1000);
