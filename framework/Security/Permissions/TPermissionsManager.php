@@ -186,7 +186,7 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	private $_autoAllowWithPermission = true;
 	
 	/** @var bool add module rules, allows User's data, default true */
-	private $_autoRulePresetRules = true;
+	private $_autoPresetRules = true;
 	
 	/** @var bool add Deny All rule to every permissions as the last rule, default true */
 	private $_autoDenyAll = true;
@@ -291,7 +291,7 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 		if ($this->_autoAllowWithPermission) {
 			$this->_permissionRules[$permission]->add(new TAuthorizationRule('allow', '*', $permission, '*', '*', $this->_autoRulePriority));
 		}
-		if ($this->_autoRulePresetRules && $rules) {
+		if ($this->_autoPresetRules && $rules) {
 			if (!is_array($rules)) {
 				$rules = [$rules];
 			}
@@ -808,7 +808,7 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 	 */
 	public function getAutoPresetRules()
 	{
-		return $this->_autoRulePresetRules;
+		return $this->_autoPresetRules;
 	}
 	
 	/**
@@ -820,7 +820,7 @@ class TPermissionsManager extends \Prado\TModule implements IPermissions
 		if ($this->_initialized) {
 			throw new TInvalidOperationException('permissions_property_unchangeable', 'AutoPresetRules');
 		}
-		$this->_autoRulePresetRules = TPropertyValue::ensureBoolean($enable);
+		$this->_autoPresetRules = TPropertyValue::ensureBoolean($enable);
 	}
 	
 	/**
