@@ -259,11 +259,11 @@ class TDbCronModule extends TCronModule implements IDbModule
 		$driver = $db->getDriverName();
 		$autotype = 'INTEGER';
 		$autoidAttributes = '';
-		if ($driver === 'mysql') {
+		if ($driver === TDbConnection::DRIVER_MYSQL) {
 			$autoidAttributes = ' AUTO_INCREMENT';
-		} elseif ($driver === 'sqlite') {
+		} elseif ($driver === TDbConnection::DRIVER_SQLITE) {
 			$autoidAttributes = ' AUTOINCREMENT';
-		} elseif ($driver === 'postgresql') {
+		} elseif ($driver === TDbConnection::DRIVER_PGSQL) {
 			$autotype = 'SERIAL';
 		}
 		$postIndices = '; CREATE INDEX tname ON ' . $this->_tableName . '(`name`);' .
