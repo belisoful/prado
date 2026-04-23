@@ -219,6 +219,7 @@ class PradoUnit {
 				$e = strtr("Duplicated Database Driver '{0}' Unavailable Error", ['{0}' => $driver]);
 			} else {
 				if (static::skipDatabaseTests()) {
+					// only on skipping do we set $e
 					$e = strtr("Database Driver '{0}' Unavailable Error [PRADO_UNITTEST_SKIP_DB=1]:\n{1}", ['{0}' => $driver, '{1}' => $e->getMessage()]);
 				}
 				static::$dbConnectionException[$driver] = true;
@@ -229,6 +230,7 @@ class PradoUnit {
 				$e = strtr("Duplicated Database '{0}' Not Found Error (Connection OK)", ['{0}' => $driver]);
 			} else {
 				if (static::skipDatabaseTests()) {
+					// only on skipping do we set $e
 					$e .= strtr("Database '{0}' Not Found Error (Connection OK) [PRADO_UNITTEST_SKIP_DB=1]:\n{1}", ['{0}' => $driver, '{1}' => $e->getMessage()]);;
 				}
 				static::$dbDatabaseException[$driver] = true;
@@ -238,6 +240,7 @@ class PradoUnit {
 				$e = strtr("Duplicated Table Not Found Error (driver: '{0}')", ['{0}' => $driver]);
 			} else {
 				if (static::skipDatabaseTests()) {
+					// only on skipping do we set $e
 					$e = strtr("Table Not Found Error (driver: '{0}') [PRADO_UNITTEST_SKIP_DB=1]:\n{1}", ['{0}' => $driver, '{1}' => $e->getMessage()]);
 				}
 				static::$dbTableException[$driver] = true;
@@ -248,9 +251,13 @@ class PradoUnit {
 	
 	public static function isNoConnection($e): bool
 	{
-		return is_int(stripos((string) $e->getMessage(), 'No such file')) || 
-			   is_int(stripos((string) $e->getMessage(), 'Connection refused')) || 
-			   is_int(stripos((string) $e->getMessage(), 'failed to establish'));
+		$msg = (string) $e->getMessage();
+		return is_int(stripos($msg, 'No such file')) ||
+			   is_int(stripos($msg, 'Connection refused')) ||
+			   is_int(stripos($msg, 'failed to establish')) ||
+			   is_int(stripos($msg, 'Unable to complete network request')) ||
+			   is_int(stripos($msg, 'ODBC Driver for SQL Server')) ||
+			   is_int(stripos($msg, 'could not connect'));
 	}
 	
 	public static function isNoDatabase($e): bool
