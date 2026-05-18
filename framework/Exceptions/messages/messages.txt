@@ -141,6 +141,10 @@ apccache_extension_required				= TAPCCache requires APC PHP extension.
 apccache_extension_not_enabled			= TAPCCache need apc.enabled = 1 in php.ini in order to work.
 apccache_extension_not_enabled_cli		= TAPCCache need apc.enable_cli = 1 in php.ini in order to work with PHP from the command line.
 
+filecache_directory_required			= TFileCache.Directory is required.
+filecache_directory_create_failed		= TFileCache cannot create cache directory '{0}'.
+filecache_directory_not_writable		= TFileCache cache directory '{0}' is not writable.
+
 errorhandler_errortemplatepath_invalid	= TErrorHandler.ErrorTemplatePath '{0}' is invalid. Make sure it is in namespace form and points to a valid directory containing error template files.
 
 pageservice_page_unknown				= Page '{0}' Not Found
