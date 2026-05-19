@@ -126,6 +126,9 @@ assetmanager_tarfile_invalid			= TAssetManager is publishing an invalid tar file
 assetmanager_source_directory_invalid	= TAssetManager is copying an invalid directory '{0}'.
 
 cache_primary_duplicated				= At most one primary cache module is allowed. {0} is trying to register as another primary cache.
+cacheproxy_backing_cache_id_required	= TCacheProxy.BackingCacheId is required.
+cacheproxy_cache_not_found				= TCacheProxy cannot find the backing cache module '{0}'.
+cacheproxy_invalid_cache_type			= TCacheProxy backing module '{0}' does not extend TCache.
 sqlitecache_extension_required			= TSqliteCache requires SQLite PHP extension.
 sqlitecache_dbfile_required				= TSqliteCache.DbFile is required.
 sqlitecache_connection_failed			= TSqliteCache database connection failed. {0}.
