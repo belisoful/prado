@@ -13,7 +13,7 @@ namespace Prado;
 use Prado\Caching\ICache;
 use Prado\Collections\TCollectionItemChangeParameter;
 use Prado\Collections\TMap;
-use Prado\Exceptions\{TConfigurationException, TExitException, THttpException};
+use Prado\Exceptions\{TConfigurationException, TExitException, THttpException, TInvalidOperationException};
 use Prado\Exceptions\TErrorHandler;
 use Prado\I18N\TGlobalization;
 use Prado\Security\IUser;
@@ -176,6 +176,11 @@ class TApplication extends TComponent implements ISingleton
 	 * @since 4.3.3
 	 */
 	public const DEFAULT_PAGE_SERVICE_CLASS = TPageService::class;
+	/**
+	 * Default Multiple Mode
+	 * @since 4.4.0
+	 */
+	public const DEFAULT_MULTIPLE_MODE = TApplicationMultipleMode::Auto;
 	/**
 	 * Key used within the dependency cache array to store sort results,
 	 * distinct from the integer spl_object_id keys used for per-instance data.
@@ -367,6 +372,13 @@ class TApplication extends TComponent implements ISingleton
 	 * @var string Customizable page service ID
 	 */
 	private $_pageServiceID;
+	/**
+	 * @var string this application's pool-registration mode.  One of the
+	 *   {@see TApplicationMultipleMode} constants.  Defaults to
+	 *   {@see TApplicationMultipleMode::Auto}.
+	 * @since 4.4.0
+	 */
+	private string $_multipleMode = '';
 
 	/**
 	 * @var int Bit field of TApplication internal state flags. Set via
@@ -401,11 +413,12 @@ class TApplication extends TComponent implements ISingleton
 			$configType = static::CONFIG_TYPE_XML;
 		}
 		$this->setMode(static::DEFAULT_APPLICATION_MODE);
-		$this->setPageServiceID(static::PAGE_SERVICE_ID);
+		$this->setPageServiceIDDirect(static::PAGE_SERVICE_ID);
+		$this->setMultipleModeDirect(static::DEFAULT_MULTIPLE_MODE);
 
-		$this->registerApplication();
 		$this->setConfigurationType($configType);
 		$this->resolvePaths($basePath);
+		$this->registerApplication();
 
 		if ($cacheConfig) {
 			$this->setCacheFile($this->buildCacheFilePath($this->getRuntimePath()));
@@ -433,14 +446,195 @@ class TApplication extends TComponent implements ISingleton
 	}
 
 	/**
-	 * Registers this instance as the primary PRADO application via {@see Prado::setApplication()}.
-	 * Called once from the constructor before any configuration is loaded.
-	 * Override in a subclass to redirect or suppress registration during testing.
+	 * Registers this instance with the Prado application pool and makes it the current
+	 * application.  Called once from the constructor (after {@see resolvePaths()}) before
+	 * any configuration is loaded.  Override in a subclass to redirect or suppress
+	 * registration during testing.
+	 *
+	 * Behavior depends on {@see getMultipleMode()}:
+	 *
+	 * - **{@see TApplicationMultipleMode::Multiple}** — always calls
+	 *   {@see Prado::setMultipleApplications(true)} and joins the pool, regardless of
+	 *   whether another application already exists.
+	 * - **{@see TApplicationMultipleMode::Singleton}** — throws
+	 *   {@see \Prado\Exceptions\TInvalidOperationException} if a *different* application
+	 *   is already registered (unless `PRADO_TEST_RUN` is defined).
+	 * - **{@see TApplicationMultipleMode::Auto}** *(default)* — becomes the singleton
+	 *   when no other application exists; automatically enables multiple-application mode
+	 *   and joins the pool when another application is already running.
+	 *
+	 * In all modes, {@see resolveUniqueId()} is called before registration to ensure this
+	 * application's unique ID does not collide with an existing pool entry.
+	 *
+	 * @throws \Prado\Exceptions\TInvalidOperationException when running in
+	 *   {@see TApplicationMultipleMode::Singleton} mode but another application is already
+	 *   registered.
 	 * @since 4.3.3
 	 */
-	protected function registerApplication()
+	protected function registerApplication(): void
+	{
+		if (defined('PRADO_TEST_RUN')) {
+			$this->setPradoApplication();
+			return;
+		}
+
+		$mode = $this->getMultipleMode();
+		$existing = Prado::getApplication();
+
+		if ($mode === TApplicationMultipleMode::Singleton && $existing !== null && $existing !== $this) {
+			throw new TInvalidOperationException('prado_application_singleton_required');
+		}
+
+		if ($mode === TApplicationMultipleMode::Multiple) {
+			Prado::setMultipleApplications(true);
+		} elseif ($existing !== null && $existing !== $this) {
+			// Auto: a different app already exists — enable multi-app mode.
+			if (!Prado::getMultipleApplications()) {
+				Prado::setMultipleApplications(true);
+			}
+		}
+
+		$this->resolveUniqueId();
+		$this->setPradoApplication();
+	}
+
+	/**
+	 * Ensures this application's unique ID does not collide with an existing entry in the
+	 * Prado application pool.  When a collision is detected the ID is made unique by
+	 * appending or incrementing a numeric suffix.
+	 *
+	 * The separator character (`-`, `.`, or `_`) is preserved when the current ID already
+	 * ends with `{sep}{n}`, so that successive calls keep the same style.  When no suffix
+	 * is present, `-` is used as the default separator and counting starts at `2`.
+	 *
+	 * Example: `a1b2c3d4` → `a1b2c3d4-2` → `a1b2c3d4-3` → …
+	 *
+	 * No-op when the pool is empty or the pool does not contain a *different* application
+	 * at the current ID (i.e., no collision exists).  Safe to call multiple times.
+	 *
+	 * @since 4.4.0
+	 */
+	protected function resolveUniqueId(): void
+	{
+		$pool = Prado::getApplications();
+		if ($pool === null) {
+			return;
+		}
+		$id = $this->getUniqueID();
+		if (!$pool->contains($id) || $pool->itemAt($id) === $this) {
+			return;
+		}
+		if (preg_match('/^(.*)([-._])(\d+)$/', $id, $m)) {
+			$base = $m[1];
+			$sep = $m[2];
+			$n = (int) $m[3];
+		} else {
+			$base = $id;
+			$sep = '-';
+			$n = 0;
+		}
+		do {
+			++$n;
+			$candidate = $base . $sep . $n;
+		} while ($pool->contains($candidate));
+		$this->setUniqueID($candidate);
+	}
+
+	/**
+	 * Registers this instance as Prado's current application singleton.
+	 *
+	 * Called once during {@see __construct()} so {@see \Prado\Prado::getApplication()}
+	 * returns this instance for the rest of the request.  Extracted into a one-line
+	 * indirection method so subclasses can override the registration step (for
+	 * example, to wire in an alternative service locator) without having to
+	 * override the larger constructor.
+	 *
+	 * @since 4.4.0
+	 */
+	protected function setPradoApplication(): void
 	{
 		Prado::setApplication($this);
+	}
+
+	/**
+	 * Returns this application's pool-registration mode.
+	 *
+	 * @return string one of the {@see TApplicationMultipleMode} constants;
+	 *   defaults to {@see TApplicationMultipleMode::Auto}.
+	 * @since 4.4.0
+	 */
+	protected function getMultipleModeDirect(): string
+	{
+		return $this->_multipleMode;
+	}
+
+	/**
+	 * Directly stores `$_multipleMode` without the side-effects of {@see setMultipleMode()}.
+	 * Intended for subclasses that need to override the storage step independently.
+	 * @param string $value one of the {@see TApplicationMultipleMode} constants.
+	 * @since 4.4.0
+	 */
+	protected function setMultipleModeDirect(string $value): void
+	{
+		$this->_multipleMode = $value;
+	}
+
+	/**
+	 * Returns this application's pool-registration mode.
+	 *
+	 * @return string one of the {@see TApplicationMultipleMode} constants;
+	 *   defaults to {@see TApplicationMultipleMode::Auto}.
+	 * @since 4.4.0
+	 */
+	public function getMultipleMode(): string
+	{
+		return $this->getMultipleModeDirect();
+	}
+
+	/**
+	 * Sets this application's pool-registration mode.
+	 *
+	 * Accepts a {@see TApplicationMultipleMode} constant name (`"Auto"`, `"Multiple"`,
+	 * `"Singleton"`) or a legacy boolean-like value for backward compatibility:
+	 * `true`/`"true"`/`"1"` maps to {@see TApplicationMultipleMode::Multiple},
+	 * `false`/`"false"`/`"0"` maps to {@see TApplicationMultipleMode::Singleton}, and
+	 * `null`/`""` maps to {@see TApplicationMultipleMode::Auto}.
+	 *
+	 * Side effects when the value changes:
+	 * - **Multiple** → calls {@see Prado::setMultipleApplications(true)}.
+	 * - **Singleton** → throws if Prado is already in multiple-application mode.
+	 * - **Auto** → no Prado-level change.
+	 *
+	 * Set from the application configuration file:
+	 * ```xml
+	 * <application MultipleMode="Auto">
+	 * ```
+	 *
+	 * @param mixed $value a {@see TApplicationMultipleMode} constant name, a bool, or null.
+	 * @throws \Prado\Exceptions\TInvalidOperationException when set to
+	 *   {@see TApplicationMultipleMode::Singleton} but Prado is already in
+	 *   multiple-application mode.
+	 * @since 4.4.0
+	 */
+	public function setMultipleMode($value): void
+	{
+		if ($value === null || $value === '') {
+			$mode = TApplicationMultipleMode::Auto;
+		} elseif (is_string($value) && in_array($value, [TApplicationMultipleMode::Auto, TApplicationMultipleMode::Multiple, TApplicationMultipleMode::Singleton], true)) {
+			$mode = $value;
+		} else {
+			// boolean support: true/'true'/'1' → Multiple, false/'false'/'0' → Singleton.
+			$mode = TPropertyValue::ensureBoolean($value) ? TApplicationMultipleMode::Multiple : TApplicationMultipleMode::Singleton;
+		}
+		if ($this->getMultipleModeDirect() === $mode) {
+			return;
+		}
+		$this->setMultipleModeDirect($mode);
+		if ($mode === TApplicationMultipleMode::Multiple) {
+			Prado::setMultipleApplications(true);
+		} elseif ($mode === TApplicationMultipleMode::Singleton && Prado::getMultipleApplications()) {
+			throw new TInvalidOperationException('prado_application_multiapp_mode_conflict');
+		}
 	}
 
 	/**
@@ -847,7 +1041,7 @@ class TApplication extends TComponent implements ISingleton
 	 */
 	public function getPageServiceID()
 	{
-		return $this->_pageServiceID;
+		return $this->getPageServiceIDDirect();
 	}
 
 	/**
@@ -860,12 +1054,40 @@ class TApplication extends TComponent implements ISingleton
 	 */
 	public function setPageServiceID($value)
 	{
-		$old = $this->_pageServiceID;
-		$this->_pageServiceID = $value;
-		if ($old !== $value && $this->hasRegisteredService($old) && !$this->hasRegisteredService($value)) {
-			$this->registerService($value, ...$this->getRegisteredService($old));
-			$this->unregisterService($old);
+		$old = $this->getPageServiceIDDirect();
+		if ($value !== $old) {
+			$this->setPageServiceIDDirect($value);
+			if ($this->hasRegisteredService($old) && !$this->hasRegisteredService($value)) {
+				$this->registerService($value, ...$this->getRegisteredService($old));
+				$this->unregisterService($old);
+			}
 		}
+	}
+
+	/**
+	 * Returns the stored page service ID without consulting {@see getPageServiceID()}'s
+	 * accessor logic.  Intended for subclasses that need to read the field
+	 * independently of the public getter — and for {@see setPageServiceID()},
+	 * which compares the new value against this raw field before re-registering.
+	 * @return string the stored page service ID.
+	 * @since 4.4.0
+	 */
+	protected function getPageServiceIDDirect(): string
+	{
+		return $this->_pageServiceID;
+	}
+
+	/**
+	 * Directly stores `$_pageServiceID` without the service-registry migration
+	 * that {@see setPageServiceID()} performs.  Intended for subclasses that
+	 * need to override the storage step independently and for the public setter,
+	 * which calls this method after handling the registry move.
+	 * @param string $value the new page service ID.
+	 * @since 4.4.0
+	 */
+	protected function setPageServiceIDDirect(string $value): void
+	{
+		$this->_pageServiceID = $value;
 	}
 
 	/**
@@ -1037,14 +1259,18 @@ class TApplication extends TComponent implements ISingleton
 	 * Derives a unique application ID from `$token` (typically the runtime path).
 	 * Subclasses may override this method to substitute a different hashing algorithm.
 	 * Called by {@see setRuntimePath()} and, on demand, by {@see getUniqueID()}.
+	 *
+	 * The hash function changed from `md5` to `sha1` in 4.4.0; existing caches
+	 * keyed by an app's previous unique ID are missed once after the upgrade
+	 * and rebuilt on the next request.
+	 *
 	 * @param string $token the value to hash; normally the absolute runtime path.
 	 * @return string a unique ID derived from the token.
 	 * @since 4.3.3
-	 * @todo v4.4 change md5 to sha1
 	 */
 	protected function generateAppUniqueId(string $token): string
 	{
-		return md5($token);
+		return sha1($token);
 	}
 
 	/**
