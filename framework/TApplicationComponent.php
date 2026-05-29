@@ -29,12 +29,58 @@ use Prado\TApplicationMode;
  * Besides, TApplicationComponent defines two shortcut methods for
  * publishing private files: {@see publishAsset} and {@see publishFilePath}.
  *
+ * Each TApplicationComponent instance retains a reference to the
+ * {@see TApplication} that was current at construction time.  In multi-application
+ * environments this lets a component stay bound to its owning application even
+ * when a second application is pushed onto the global singleton slot.  Use
+ * {@see isCurrentApplication}, {@see ensureCurrentApplication}, and
+ * {@see makeCurrentApplication} to inspect and manage that binding.
+ *
  * @author Qiang Xue <qiang.xue@gmail.com>
+ * @author Brad Anderson <belisoful@icloud.com> Multi-application support v4.4.0
  * @since 3.0
  */
 class TApplicationComponent extends \Prado\TComponent
 {
 	public const FX_CACHE_FILE = 'fxevent.cache';
+
+	/**
+	 * The application instance that has owned this component since construction.
+	 * Excluded from serialization so that the entire {@see TApplication} object
+	 * graph is not embedded in a serialized component.  {@see __wakeup()} re-adopts
+	 * the current global singleton after deserialization.
+	 */
+	private ?TApplication $_application = null;
+
+	/**
+	 * Captures the current global application and initializes global-event listening.
+	 */
+	public function __construct()
+	{
+		$this->resolveApplication();
+		parent::__construct();
+	}
+
+	/**
+	 * Excludes {@see $_application} from serialization to prevent the entire
+	 * {@see TApplication} object graph from being embedded in serialized components.
+	 * @param array $exprops by reference
+	 */
+	protected function _getZappableSleepProps(&$exprops)
+	{
+		parent::_getZappableSleepProps($exprops);
+		$exprops[] = "\0" . __CLASS__ . "\0_application";
+	}
+
+	/**
+	 * Re-adopts the current global application singleton after deserialization.
+	 */
+	public function __wakeup()
+	{
+		$this->resolveApplication();
+		parent::__wakeup();
+	}
+
 	/**
 	 * TApplicationComponents auto listen to global events.
 	 *
@@ -94,51 +140,142 @@ class TApplicationComponent extends \Prado\TComponent
 	}
 
 	/**
-	 * @return \Prado\TApplication current application instance
+	 * Returns the application instance this component has been bound to since
+	 * construction.  When {@see $_application} is null (e.g. after deserialization
+	 * before {@see __wakeup} has run), the global singleton is resolved first via
+	 * {@see resolveApplication}.
+	 *
+	 * @return ?TApplication current application instance, or null if none is registered.
 	 */
 	public function getApplication()
 	{
-		return Prado::getApplication();
+		$this->resolveApplication();
+		return $this->getApplicationDirect();
 	}
 
 	/**
-	 * @return \Prado\TService the current service
+	 * Returns the stored application reference without triggering lazy resolution.
+	 * Unlike {@see getApplication}, this method never calls {@see resolveApplication}
+	 * and may return null even when a global singleton exists.
+	 *
+	 * @return ?TApplication the stored application instance, or null.
+	 * @since 4.4.0
+	 */
+	protected function getApplicationDirect(): ?TApplication
+	{
+		return $this->_application;
+	}
+
+	/**
+	 * Stores an application reference directly, bypassing {@see resolveApplication}.
+	 * Passing null clears the stored reference; a subsequent call to
+	 * {@see getApplication} will then re-resolve from the global singleton.
+	 *
+	 * @param ?TApplication $app the application instance to store, or null to clear.
+	 * @since 4.4.0
+	 */
+	protected function setApplicationDirect(?TApplication $app): void
+	{
+		$this->_application = $app;
+	}
+
+	/**
+	 * Populates {@see $_application} from the global singleton when it has not
+	 * yet been set.  Has no effect when {@see $_application} is already non-null,
+	 * preserving the component's original application binding in multi-application
+	 * environments.
+	 *
+	 * @since 4.4.0
+	 */
+	protected function resolveApplication(): void
+	{
+		if ($this->getApplicationDirect() === null) {
+			$this->setApplicationDirect(Prado::getApplication());
+		}
+	}
+
+	/**
+	 * Returns whether this component's stored application is the current global singleton.
+	 * Returns false when {@see $_application} is null or when it differs from
+	 * {@see Prado::getApplication}.
+	 *
+	 * @return bool true if the stored application is the current global singleton.
+	 * @since 4.4.0
+	 */
+	public function isCurrentApplication(): bool
+	{
+		$app = $this->getApplicationDirect();
+		return $app !== null && $app === Prado::getApplication();
+	}
+
+	/**
+	 * Updates the stored application reference to the current global singleton when
+	 * they differ.  Has no effect when the global singleton is null (preserving the
+	 * existing reference) or when the component is already bound to the current singleton.
+	 *
+	 * @agents remove this.  a component should not switch between apps like this.
+	 */
+	public function ensureCurrentApplication(): void
+	{
+		$globalApp = Prado::getApplication();
+		if ($globalApp !== null && $this->getApplicationDirect() !== $globalApp) {
+			$this->setApplicationDirect($globalApp);
+		}
+	}
+
+	/**
+	 * Promotes the stored application to be the current global singleton.
+	 * Has no effect when {@see $_application} is null or when it is already the
+	 * current global singleton.
+	 *
+	 * @since 4.4.0
+	 */
+	public function makeCurrentApplication(): void
+	{
+		$app = $this->getApplicationDirect();
+		if ($app !== null && !$this->isCurrentApplication()) {
+			Prado::setApplication($app);
+		}
+	}
+
+	/**
+	 * @return ?\Prado\TService the current service, or null if no application is available.
 	 */
 	public function getService()
 	{
-		return Prado::getApplication()->getService();
+		return $this->getApplication()?->getService();
 	}
 
 	/**
-	 * @return \Prado\Web\THttpRequest the current user request
+	 * @return ?\Prado\Web\THttpRequest the current user request, or null if no application is available.
 	 */
 	public function getRequest()
 	{
-		return Prado::getApplication()->getRequest();
+		return $this->getApplication()?->getRequest();
 	}
 
 	/**
-	 * @return \Prado\Web\THttpResponse the response
+	 * @return ?\Prado\Web\THttpResponse the response, or null if no application is available.
 	 */
 	public function getResponse()
 	{
-		return Prado::getApplication()->getResponse();
+		return $this->getApplication()?->getResponse();
 	}
 
 	/**
-	 * @return \Prado\Web\THttpSession user session
+	 * @return ?\Prado\Web\THttpSession user session, or null if no application is available.
 	 */
 	public function getSession()
 	{
-		return Prado::getApplication()->getSession();
+		return $this->getApplication()?->getSession();
 	}
 
 	/**
-	 * @return \Prado\Security\IUser information about the current user
+	 * @return ?\Prado\Security\IUser information about the current user, or null if no application is available.
 	 */
 	public function getUser()
 	{
-		return Prado::getApplication()->getUser();
+		return $this->getApplication()?->getUser();
 	}
 
 	/**
@@ -173,6 +310,6 @@ class TApplicationComponent extends \Prado\TComponent
 	 */
 	public function publishFilePath($fullPath, $checkTimestamp = false)
 	{
-		return Prado::getApplication()->getAssetManager()->publishFilePath($fullPath, $checkTimestamp);
+		return $this->getApplication()?->getAssetManager()?->publishFilePath($fullPath, $checkTimestamp);
 	}
 }
