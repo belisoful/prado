@@ -20,7 +20,7 @@ class TWebControlRenderTraitTestControl extends TWebControl
 /**
  * Unit tests for {@see TWebControlRenderTrait}.
  *
- * @covers TWebControlRenderTrait
+ * @covers \Prado\Test\Unit\Harness\Traits\TWebControlRenderTrait
  */
 class TWebControlRenderTraitTest extends TestCase
 {
