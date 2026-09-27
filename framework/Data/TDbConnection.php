@@ -573,23 +573,25 @@ class TDbConnection extends \Prado\TComponent implements IDbConnection
 	 */
 	public function setCharset($value)
 	{
-		$driver = $this->getDriverName();
 		if (!$this->getCanCharsetChange()) {
-			throw new TDbException('dbconnection_charset_unchangeable', $driver);
+			throw new TDbException('dbconnection_charset_unchangeable', $this->getDriverName());
 		}
 		$this->_charset = $value;
 		$this->setConnectionCharset();
 	}
 
 	/**
-	 * If the connection is not active or
+	 * The charset can change while the connection is inactive, and on an active mysql,
+	 * pgsql or sqlite connection.
 	 * @return bool if the charset can change
 	 * @since 4.3.3
 	 */
 	public function getCanCharsetChange(): bool
 	{
-		$driver = $this->getDriverName();
-		return !$this->getActive() || in_array($driver, [TDbDriver::DRIVER_MYSQL, TDbDriver::DRIVER_PGSQL, TDbDriver::DRIVER_SQLITE]);
+		if (!$this->getActive()) {
+			return true;
+		}
+		return in_array($this->getDriverName(), [TDbDriver::DRIVER_MYSQL, TDbDriver::DRIVER_PGSQL, TDbDriver::DRIVER_SQLITE]);
 	}
 
 	/**
@@ -602,7 +604,7 @@ class TDbConnection extends \Prado\TComponent implements IDbConnection
 	 * was configured.
 	 *
 	 * Driver query used:
-	 *   mysql    — SELECT @@character_set_client
+	 *   mysql    — SELECT @@character_set_connection
 	 *   pgsql    — SELECT pg_client_encoding()
 	 *   sqlite   — PRAGMA encoding
 	 *   firebird — MON$ATTACHMENTS ⋈ RDB$CHARACTER_SETS; falls back to the

@@ -241,7 +241,6 @@ class CultureInfo
 	 *      ICU list stores the locale in POSIX form.
 	 * @param string $culture a culture
 	 * @return bool true if valid, false otherwise.
-	 * @since 4.3.3
 	 */
 	public static function validCulture($culture)
 	{

@@ -1069,7 +1069,7 @@ class TWebControl extends \Prado\Web\UI\TControl implements IStyleable
 			$writer->addAttribute('inert', 'inert');
 		}
 		if ($this->getPopover()) {
-			$writer->addAttribute('popover', 'popover');
+			$writer->addAttribute('popover', 'auto');
 		}
 		if ($aria = $this->getViewState('Aria', null)) {
 			$aria->addAttributesToRender($writer);

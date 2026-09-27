@@ -102,7 +102,7 @@ class TScaffoldInputBase implements IScaffoldInput
 				$class = $inputClasses[0];
 				if (!is_string($class) || !is_a($class, IScaffoldInput::class, true)) {
 					// @todo v4.4 TActiveRecordConfigurationException, move message
-					throw new TConfigurationException('ar_not_input_base', is_string($class) ? $class : $class::class, IScaffoldInput::class);
+					throw new TConfigurationException('ar_not_input_base', is_string($class) ? $class : get_debug_type($class), IScaffoldInput::class);
 				}
 				return new $class();
 		}

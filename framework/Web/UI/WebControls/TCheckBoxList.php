@@ -434,7 +434,7 @@ class TCheckBoxList extends TListControl implements IRepeatInfoUser, \Prado\Web\
 			$this->_repeatedControl->setAccessKey($accessKey);
 			$this->_repeatedControl->setTabIndex($tabIndex);
 			$this->setAccessKey('');
-			$this->setTabIndex(0);
+			$this->setTabIndex(null);
 			$this->addAttributesToRender($writer);
 			if (!$needSpan) {
 				$this->addGroupAttributesToRender($writer);

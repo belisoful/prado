@@ -67,7 +67,6 @@ httpsession_savepath_unchangeable		= THttpSession.SavePath ne peut pas être mod
 httpsession_savepath_invalid			= THttpSession.SavePath '{0}' est invalide.
 httpsession_storage_unchangeable		= THttpSession.Storage ne peut pas être modifié après que la session ait démarré.
 httpsession_cookiemode_unchangeable		= THttpSession.CookieMode ne peut pas être modifié après que la session ait démarré.
-httpsession_autostart_unchangeable		= THttpSession.AutoStart ne peut pas être modifié après que le module de session ait été initialisé.
 httpsession_gcprobability_unchangeable	= THttpSession.GCProbability ne peut pas être modifié après que la session ait démarré.
 httpsession_gcprobability_invalid		= THttpSession.GCProbability doit être un entier compris entre 0 et 100.
 httpsession_transid_unchangeable		= THttpSession.UseTransparentSessionID ne peut pas être modifié après que la session ait démarré.
@@ -75,8 +74,6 @@ httpsession_transid_cookieonly			= THttpSession.UseTransparentSessionID ne peut 
 httpsession_maxlifetime_unchangeable	= THttpSession.Timeout ne peut pas être modifié après que la session ait démarré.
 
 assetmanager_basepath_invalid			= TAssetManager.BasePath '{0}' est invalide. Vérifier qu'il est bien au format 'namespace' et qu'il pointe bien vers un répertoire accessible en écriture par le propriétaire du processus serveur Web
-assetmanager_basepath_unchangeable		= TAssetManager.BasePath ne peut pas être modifié après l'initialisation du module.
-assetmanager_baseurl_unchangeable		= TAssetManager.BaseUrl ne peut pas être modifié après l'initialisation du module.
 assetmanager_filepath_invalid			= TAssetManager essaye de publier un fichier invalide '{0}'.
 assetmanager_tarchecksum_invalid		= TAssetManager essaye de publier une archive 'tar' avec un checksum invalide '{0}'.
 assetmanager_tarfile_invalid			= TAssetManager essaye de publier une archive 'tar' invalide '{0}'.
@@ -107,8 +104,6 @@ pageservice_page_unknown				= La page '{0}' n'a pas été trouvée
 pageservice_pageclass_unknown			= La classe de la page '{0}' est inconnue.
 pageservice_basepath_invalid			= TPageService.BasePath '{0}' n'est pas un répertoire valide.
 pageservice_page_required				= Le nom de la page est requis.
-pageservice_defaultpage_unchangeable	= TPageService.DefaultPage ne peut pas être modifié après l'initialisation du service.
-pageservice_basepath_unchangeable		= TPageService.BasePath ne peut pas être modifié après l'initialisation du service.
 pageservice_pageclass_invalid			= La classe de la page {0} est invalide. Cela devrait être TPage ou un héritage de TPage.
 pageservice_includefile_invalid			= Impossible de trouver le fichier de configuration du service de page {0}. Verifier qu'il est au format 'namespace' et que l'extension du fichier est '.xml'.
 
@@ -125,7 +120,6 @@ pageserviceconf_includefile_required	= Page configuration <include> element must
 template_closingtag_unexpected			= Unexpected closing tag '{0}' is found.
 template_closingtag_expected			= Closing tag '{0}' is expected.
 template_directive_nonunique			= Directive '<%@ ... %>' must appear at the beginning of the template and can appear at most once.
-template_comments_forbidden				= Template comments are not allowed within property tags.
 template_matching_unexpected			= Unexpected matching.
 template_property_unknown				= {0} has no property called '{1}'.
 template_event_unknown					= {0} has no event called '{1}'.
@@ -163,7 +157,6 @@ authmanager_session_required			= TAuthManager requires a session application mod
 
 thememanager_basepath_invalid			= TThemeManager.BasePath '{0}' is not a valid path alias. Make sure you have defined this alias in configuration and it points to a valid directory.
 thememanager_basepath_invalid2			= TThemeManager.BasePath '{0}' is not a valid directory.
-thememanager_basepath_unchangeable		= TThemeManager.BasePath cannot be modified after the module is initialized.
 
 theme_baseurl_required					= TThemeManager.BasePath is required. By default, a directory named 'themes' under the directory containing the application entry script is assumed.
 theme_path_inexistent					= Theme path '{0}' does not exist.
@@ -308,7 +301,6 @@ hotspotcollection_hotspot_required		= THotSpotCollection can only accept instanc
 htmlarea_textmode_readonly				= THtmlArea.TextMode is read-only.
 htmlarea_tarfile_invalid				= THtmlArea is unable to locate the TinyMCE tar file.
 
-parametermodule_parameterfile_unchangeable = TParameterModule.ParameterFile is not changeable because the module is already initialized.
 parametermodule_parameterfile_invalid	= TParameterModule.ParameterFile '{0}' is invalid. Make sure it is in namespace format and the file extension is '.xml'.
 parametermodule_parameterid_required	= Parameter element must have 'id' attribute.
 

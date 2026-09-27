@@ -512,9 +512,13 @@ class TWeakMap extends TMap implements IWeakCollection, ICollectionFilter
 
 	/**
 	 * Removes all entries and resets the WeakMap cache.
+	 * @throws TInvalidOperationException if the map is read-only
 	 */
 	public function clear(): void
 	{
+		if ($this->getReadOnly()) {
+			throw new TInvalidOperationException('map_readonly', $this::class);
+		}
 		$c = count($this->_d);
 
 		foreach (array_keys($this->_d) as $key) {
@@ -526,6 +530,7 @@ class TWeakMap extends TMap implements IWeakCollection, ICollectionFilter
 		}
 
 		if ($c) {
+			$this->_eventHandlerCount = 0;
 			$this->weakRestart();
 		}
 	}

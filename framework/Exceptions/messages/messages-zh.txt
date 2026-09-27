@@ -72,7 +72,6 @@ httpsession_savepath_unchangeable		= THttpSession.SavePath无法被修改，因�
 httpsession_savepath_invalid			= THttpSession.SavePath所指目录“{0}”不存在。
 httpsession_storage_unchangeable		= THttpSession.Storage无法被修改，因为session已经启动了。
 httpsession_cookiemode_unchangeable		= THttpSession.CookieMode无法被修改，因为session已经启动了。
-httpsession_autostart_unchangeable		= THttpSession.AutoStart无法被修改，因为session已经启动了。
 httpsession_gcprobability_unchangeable	= THttpSession.GCProbability无法被修改，因为session已经启动了。
 httpsession_gcprobability_invalid		= THttpSession.GCProbability必须是个0到100之间的整数。
 httpsession_transid_unchangeable		= THttpSession.UseTransparentSessionID无法被修改，因为session已经启动了。
@@ -80,8 +79,6 @@ httpsession_transid_cookieonly			= THttpSession.UseTransparentSessionID cannot b
 httpsession_maxlifetime_unchangeable	= THttpSession.Timeout无法被修改，因为session已经启动了。
 
 assetmanager_basepath_invalid			= TAssetManager.BasePath所指路径“{0}”非法。请确认它以命名空间方式指定，并且它所对应的文件目录可以被Web服务器进程写入。
-assetmanager_basepath_unchangeable		= TAssetManager.BasePath无法被修改，因为该模块已经初始化完毕。
-assetmanager_baseurl_unchangeable		= TAssetManager.BaseUrl无法被修改，因为该模块已经初始化完毕。
 assetmanager_filepath_invalid			= TAssetManager试图发布一个不存在的文件“{0}”。
 assetmanager_tarchecksum_invalid		= TAssetManager试图发布一个校验值不正确的tar文件。
 assetmanager_tarfile_invalid			= TAssetManager试图发布一个不存在的tar文件“{0}”。
@@ -112,8 +109,6 @@ pageservice_page_unknown				= 无法找到页面“{0}”。
 pageservice_pageclass_unknown			= 未知页面类“{0}”。
 pageservice_basepath_invalid			= TPageService.BasePath所指路径“{0}”不存在。
 pageservice_page_required				= 请提供页面名字。
-pageservice_defaultpage_unchangeable	= TPageService.DefaultPage无法被修改，因为页面服务已经初始化完毕。
-pageservice_basepath_unchangeable		= TPageService.BasePath无法被修改，因为页面服务已经初始化完毕。
 pageservice_pageclass_invalid			= 页面类“{0}”必须继承TPage。
 pageservice_includefile_invalid			= 无法找到页面服务配置“{0}”。请确认它以命名空间方式指定，并且文件名以“.xml”结尾。
 
@@ -130,7 +125,6 @@ pageserviceconf_includefile_required	= Page configuration <include> element must
 template_closingtag_unexpected			= Unexpected closing tag '{0}' is found.
 template_closingtag_expected			= Closing tag '{0}' is expected.
 template_directive_nonunique			= Directive '<%@ ... %>' must appear at the beginning of the template and can appear at most once.
-template_comments_forbidden				= Template comments are not allowed within property tags.
 template_matching_unexpected			= Unexpected matching.
 template_property_unknown				= {0} has no property called '{1}'.
 template_event_unknown					= {0} has no event called '{1}'.
@@ -168,7 +162,6 @@ authmanager_session_required			= TAuthManager requires a session application mod
 
 thememanager_basepath_invalid			= TThemeManager.BasePath '{0}' is not a valid path alias. Make sure you have defined this alias in configuration and it points to a valid directory.
 thememanager_basepath_invalid2			= TThemeManager.BasePath '{0}' is not a valid directory.
-thememanager_basepath_unchangeable		= TThemeManager.BasePath cannot be modified after the module is initialized.
 
 theme_baseurl_required					= TThemeManager.BasePath is required. By default, a directory named 'themes' under the directory containing the application entry script is assumed.
 theme_path_inexistent					= Theme path '{0}' does not exist.
@@ -314,7 +307,6 @@ hotspotcollection_hotspot_required		= THotSpotCollection can only accept instanc
 htmlarea_textmode_readonly				= THtmlArea.TextMode is read-only.
 htmlarea_tarfile_invalid				= THtmlArea is unable to locate the TinyMCE tar file.
 
-parametermodule_parameterfile_unchangeable = TParameterModule.ParameterFile is not changeable because the module is already initialized.
 parametermodule_parameterfile_invalid	= TParameterModule.ParameterFile '{0}' is invalid. Make sure it is in namespace format and the file extension is '.xml'.
 parametermodule_parameterid_required	= Parameter element must have 'id' attribute.
 

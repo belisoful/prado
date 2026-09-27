@@ -71,17 +71,14 @@ use Prado\Web\Services\TPageService;
  *   name; {@see \Prado\Web\UI\WebControls\TStyle::methodToAttributeName()} also reads
  *   an underscore as a dash, so `Style.font_size` reaches `font-size` as well.
  *
- * @note AGENTS: For visibility on screen, the code blocks below must remain dense.
  * @author Qiang Xue <qiang.xue@gmail.com>
  * @author Brad Anderson <belisoful@icloud.com> dash-andCaseSupport.
  * @since 3.0
- * @ method \Prado\Web\Services\TPageService getService()
+ * @method \Prado\Web\Services\TPageService getService()
  * @phpstan-consistent-constructor
  */
 class TTemplate extends \Prado\TApplicationComponent implements ITemplate
 {
-	private const PARSE_COMMENTS = '<!---.*?---!?>';
-
 	private const PARSE_SINGLE_QUOTED_VALUE = '\'.*?\'';
 	private const PARSE_DOUBLE_QUOTED_VALUE = '".*?"';
 	private const PARSE_EXPRESSION_VALUE = '.*?';
@@ -590,7 +587,6 @@ class TTemplate extends \Prado\TApplicationComponent implements ITemplate
 							$tpl[$c++] = $this->packTemplate($container, substr($input, $textStart, $matchStart - $textStart));
 						}
 						$textStart = $matchEnd + 1;
-						//$propName = strtolower($match[6][0]);
 						$propName = ($match[6][0]);
 						$propKey = strtolower($propName);
 						$attrs = $this->parseAttributes($match[7][0], $match[7][1]);
@@ -632,7 +628,6 @@ class TTemplate extends \Prado\TApplicationComponent implements ITemplate
 						if ($matchStart > $textStart) {
 							$value = substr($input, $textStart, $matchStart - $textStart);
 							if (str_ends_with($propKey, 'template')) {
-								//if (strncasecmp(substr($propName, -8, 8), 'template', 8) === 0) {
 								$propInfo = $this->parseTemplateProperty($propName, $value, $textStart);
 							} else {
 								$propInfo = $this->parseAttribute($propName, $value);

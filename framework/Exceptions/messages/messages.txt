@@ -120,7 +120,6 @@ httpsession_savepath_unchangeable		= THttpSession.SavePath cannot be modified af
 httpsession_savepath_invalid			= THttpSession.SavePath '{0}' is invalid.
 httpsession_storage_unchangeable		= THttpSession.Storage cannot be modified after the session is started.
 httpsession_cookiemode_unchangeable		= THttpSession.CookieMode cannot be modified after the session is started.
-httpsession_autostart_unchangeable		= THttpSession.AutoStart cannot be modified after the session module is initialized.
 httpsession_gcprobability_unchangeable	= THttpSession.GCProbability cannot be modified after the session is started.
 httpsession_gcprobability_invalid		= THttpSession.GCProbability must be an integer between 0 and 100.
 httpsession_transid_unchangeable		= THttpSession.UseTransparentSessionID cannot be modified after the session is started.
@@ -129,8 +128,6 @@ httpsession_maxlifetime_unchangeable	= THttpSession.Timeout cannot be modified a
 httpsession_handler_invalid             = THttpSessionHandler can only accept a THttpSession object as constructor parameter
 
 assetmanager_basepath_invalid			= TAssetManager.BasePath '{0}' is invalid. Make sure it is in namespace form and points to a directory writable by the Web server process.
-assetmanager_basepath_unchangeable		= TAssetManager.BasePath cannot be modified after the module is initialized.
-assetmanager_baseurl_unchangeable		= TAssetManager.BaseUrl cannot be modified after the module is initialized.
 assetmanager_filepath_invalid			= TAssetManager is publishing an invalid file '{0}'.
 assetmanager_tarchecksum_invalid		= TAssetManager is publishing a tar file with invalid checksum '{0}'.
 assetmanager_tarfile_invalid			= TAssetManager is publishing an invalid tar file '{0}'.
@@ -181,8 +178,6 @@ pageservice_pageclass_unknown			= Page class '{0}' is unknown.
 pageservice_basepath_invalid			= TPageService.BasePath '{0}' is not a valid directory.
 pageservice_security_violation			= TPageService cannot access additional directory '{0}'.
 pageservice_page_required				= Page Name Required
-pageservice_defaultpage_unchangeable	= TPageService.DefaultPage cannot be modified after the service is initialized.
-pageservice_basepath_unchangeable		= TPageService.BasePath cannot be modified after the service is initialized.
 pageservice_pageclass_invalid			= Page class {0} is invalid. It should be TPage or extend from TPage.
 pageservice_includefile_invalid			= Unable to find page service configuration {0}. Make sure it is in namespace format and the file ends with ".xml" or ".php".
 
@@ -255,7 +250,6 @@ initialized_requires_initialization		= {1}.{0} requires initialization before pr
 template_closingtag_unexpected			= Unexpected closing tag '{0}' is found.
 template_closingtag_expected			= Closing tag '{0}' is expected, found '{1}'.
 template_directive_nonunique			= Directive '<%@ ... %>' must appear at the beginning of the template and can appear at most once.
-template_comments_forbidden				= Template comments are not allowed within property tags.
 template_matching_unexpected			= Unexpected matching.
 template_property_unknown				= {0} has no property called '{1}'.
 template_event_unknown					= {0} has no event called '{1}'.
@@ -316,7 +310,6 @@ permissions_permissionfile_invalid		= TPermissionsManager.PermissionFile '{0}' i
 
 thememanager_basepath_invalid			= TThemeManager.BasePath '{0}' is not a valid path alias. Make sure you have defined this alias in configuration and it points to a valid directory.
 thememanager_basepath_invalid2			= TThemeManager.BasePath '{0}' is not a valid directory.
-thememanager_basepath_unchangeable		= TThemeManager.BasePath cannot be modified after the module is initialized.
 
 theme_baseurl_required					= TThemeManager.BasePath is required. By default, a directory named 'themes' under the directory containing the application entry script is assumed.
 theme_path_inexistent					= Theme path '{0}' does not exist.
@@ -492,7 +485,6 @@ hotspotcollection_hotspot_required		= THotSpotCollection can only accept instanc
 htmlarea_textmode_readonly				= THtmlArea.TextMode is read-only.
 htmlarea_tarfile_invalid				= THtmlArea is unable to locate the TinyMCE tar file.
 
-parametermodule_parameterfile_unchangeable = TParameterModule.ParameterFile is not changeable because the module is already initialized.
 parametermodule_parameterfile_invalid	= TParameterModule.ParameterFile '{0}' is invalid. Make sure it is in namespace format and the file extension is '.xml' or '.php'.
 parametermodule_parameterid_required	= Parameter element must have 'id' attribute.
 
@@ -721,6 +713,7 @@ closurecrontask_no_closure				= TClosureCronTask '{0}' has no closure to run.
 closurecrontask_closure_required		= TClosureCronTask requires a Closure.
 closurecrontask_invalid_securitymanager	= TClosureCronTask SecurityManagerID '{0}' is not a TSecurityManager.
 closurecrontask_decrypt_failed			= TClosureCronTask '{0}' could not decrypt its closure payload.
+closurecrontask_payload_invalid			= TClosureCronTask '{0}' has an invalid closure payload.
 cronmethodtask_no_module				= TCronMethodTask could not find module '{0}'.
 cron_usermanager_nonexistent			= TCronModule could not find the UserManager of the name '{0}'.
 cron_usermanager_invalid				= The TCronModule UserManager '{0}' is not a TUserManager.

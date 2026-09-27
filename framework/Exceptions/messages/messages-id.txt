@@ -67,7 +67,6 @@ httpsession_savepath_unchangeable	= THttpSession.SavePath tidak bisa diubah sete
 httpsession_savepath_invalid		= THttpSession.SavePath '{0}' tidak benar.
 httpsession_storage_unchangeable	= THttpSession.Storage tidak bisa diubah setelah sesi dimulai.
 httpsession_cookiemode_unchangeable	= THttpSession.CookieMode tidak bisa diubah setelah sesi dimulai.
-httpsession_autostart_unchangeable	= THttpSession.AutoStart tidak bisa diubah setelah modul sesi diinisialisasi.
 httpsession_gcprobability_unchangeable	= THttpSession.GCProbability tidak bisa diubah setelah sesi dimulai.
 httpsession_gcprobability_invalid	= THttpSession.GCProbability harus integer antara 0 dan 100.
 httpsession_transid_unchangeable	= THttpSession.UseTransparentSessionID tidak bisa diubah setelah sesi dimulai.
@@ -75,8 +74,6 @@ httpsession_transid_cookieonly			= THttpSession.UseTransparentSessionID cannot b
 httpsession_maxlifetime_unchangeable	= THttpSession.Timeout tidak bisa diubah setelah sesi dimulai.
 
 assetmanager_basepath_invalid		= TAssetManager.BasePath '{0}' tidak benar. Pastikan ia dalam bentuk namespace dan mengarah ke direktori yang bisa ditulis oleh proses server Web.
-assetmanager_basepath_unchangeable	= TAssetManager.BasePath tidak bisa diubah setelah modul diinisialisasi.
-assetmanager_baseurl_unchangeable	= TAssetManager.BaseUrl tidak bisa diubah setelah modul diinisialisasi.
 assetmanager_filepath_invalid		= TAssetManager menerbitkan file yang tidak benar '{0}'.
 assetmanager_tarchecksum_invalid	= TAssetManager menerbitkan file tar dengan checksum '{0}' yang salah.
 assetmanager_tarfile_invalid		= TAssetManager menerbitkan file tar yang tidak benar '{0}'.
@@ -107,8 +104,6 @@ pageservice_page_unknown		= Halaman '{0}' Tidak Ditemukan
 pageservice_pageclass_unknown		= Kelas Halaman '{0}' tidak dikenal.
 pageservice_basepath_invalid		= TPageService.BasePath '{0}' bukan direktori yang benar.
 pageservice_page_required		= Nama Halaman Diperlukan
-pageservice_defaultpage_unchangeable	= TPageService.DefaultPage tidak bisa diubah setelah layanan diinisialisasi.
-pageservice_basepath_unchangeable	= TPageService.BasePath tidak bisa diubah setelah layanan diinisialisasi.
 pageservice_pageclass_invalid		= Kelas halaman {0} tidak benar. Ia harus berupa TPage atau diperluas dari TPage.
 pageservice_includefile_invalid		= Tidak bisa menemukan konfigurasi layanan {0}. Pastikan ia ada dalam format namespace dan file berakhir dengan ".xml".
 
@@ -125,7 +120,6 @@ pageserviceconf_includefile_required	= Konfigurasi halaman elemen <include> haru
 template_closingtag_unexpected		= Tag penutup '{0}' yang tidak diharapkan ditemukan.
 template_closingtag_expected		= Tag penutup '{0}' diharapkan.
 template_directive_nonunique		= Direktif '<%@ ... %>' harus muncul di awal template dan bisa muncul paling banyak satu kali.
-template_comments_forbidden		= Komentar template tidak dibolehkan dalam tag properti.
 template_matching_unexpected		= Penyamaan tidak diharapkan.
 template_property_unknown		= {0} tidak memiliki properti bernama '{1}'.
 template_event_unknown			= {0} tidak memiliki event bernama '{1}'.
@@ -163,7 +157,6 @@ authmanager_session_required		= TAuthManager memerlukan modul aplikasi sesi.
 
 thememanager_basepath_invalid		= TThemeManager.BasePath '{0}' bukan alias path yang benar. Pastikan anda telah mendefinisikan alias ini dalam konfigurasi dan mengarahkan ke direktori yang benar.
 thememanager_basepath_invalid2		= TThemeManager.BasePath '{0}' bukan direktori yang benar.
-thememanager_basepath_unchangeable	= TThemeManager.BasePath tidak bisa diubah setelah modul diinisialisasi.
 
 theme_baseurl_required			= TThemeManager.BasePath diperlukan. Standarnya direktori bernama 'themes' di bawah direktori berisi naskah entri aplikasi diasumsikan.
 theme_path_inexistent			= Path tema '{0}' tidak ada.
@@ -309,7 +302,6 @@ hotspotcollection_hotspot_required		= THotSpotCollection hanya bisa meneruma tur
 htmlarea_textmode_readonly			= THtmlArea.TextMode hanya-baca.
 htmlarea_tarfile_invalid			= THtmlArea tidak bisa mencari file tar TinyMCE.
 
-parametermodule_parameterfile_unchangeable = TParameterModule.ParameterFile tidak bisa diubah karena modul sudah diinisialisasi.
 parametermodule_parameterfile_invalid	= TParameterModule.ParameterFile '{0}' tidak benar. Pastikan ia ada dalam format namespace dan ekstensi file adalah '.xml'.
 parametermodule_parameterid_required	= Elemen parameter harus mempunyai atribut 'id'.
 

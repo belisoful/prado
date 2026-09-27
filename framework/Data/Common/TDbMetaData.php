@@ -117,7 +117,7 @@ abstract class TDbMetaData extends \Prado\TComponent implements IDataMetaData
 				}
 				$class = array_pop($driverClasses);
 				if (!is_string($class) || !is_a($class, IDataMetaData::class, true)) {
-					throw new TDbException('dbmetadata_not_meta_data', is_string($class) ? $class : $class::class, IDataMetaData::class);
+					throw new TDbException('dbmetadata_not_meta_data', is_string($class) ? $class : get_debug_type($class), IDataMetaData::class);
 				}
 				return new $class($conn);
 		}
