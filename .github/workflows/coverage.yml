@@ -1,0 +1,118 @@
+name: Coverage
+on:
+  push:
+    branches: [coverage]
+  workflow_dispatch:
+    inputs:
+      path_coverage:
+        description: 'Branch and path coverage (Xdebug, slow) instead of line coverage (PCOV)'
+        type: boolean
+        default: false
+env:
+  PHP_VERSION: '8.2'
+jobs:
+  coverage:
+    name: Coverage
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    services:
+      memcached:
+        image: memcached
+        ports:
+          - 11211:11211
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select coverage driver
+        id: driver
+        run: |
+          if [ "${{ inputs.path_coverage }}" = "true" ]; then
+            echo "coverage=xdebug" >> "$GITHUB_OUTPUT"
+            echo "options=--path-coverage" >> "$GITHUB_OUTPUT"
+          else
+            echo "coverage=pcov" >> "$GITHUB_OUTPUT"
+            echo "options=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup PHP, with composer and extensions
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: ctype, dom, intl, json, mbstring, memcached, pdo_mysql, pdo_pgsql, pdo_sqlite, openssl, pcre, spl, zlib, bz2, zstd, brotli
+          coverage: ${{ steps.driver.outputs.coverage }}
+
+      - name: Get composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies
+        run: composer install --no-progress --prefer-dist --optimize-autoloader
+
+      - name: Setup mysql service
+        run: |
+          sudo systemctl start mysql.service
+          mysql -uroot -proot < ./tests/initdb_mysql.sql
+
+      - name: Setup postgres service
+        run: |
+          createdb -h 127.0.0.1 -U postgres prado_unitest
+          psql -h 127.0.0.1 -U postgres -a -w prado_unitest -f ./tests/initdb_pgsql.sql
+        env:
+          PGPASSWORD: postgres
+
+      - name: Run Unit Tests with coverage
+        run: |
+          vendor/bin/phpunit --testsuite unit,db-sqlite,db-mysql,db-pgsql \
+            ${{ steps.driver.outputs.options }} \
+            --coverage-text=build/coverage.txt \
+            --coverage-clover=build/clover.xml \
+            --coverage-html=build/coverage
+        env:
+          XDEBUG_MODE: coverage
+
+      - name: Coverage summary
+        if: always()
+        run: |
+          if [ -f build/coverage.txt ]; then
+            {
+              echo '## Coverage (${{ steps.driver.outputs.coverage }})'
+              echo
+              echo '```'
+              sed -n '/Summary:/,/^$/p' build/coverage.txt
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+            sed -n '/Summary:/,/^$/p' build/coverage.txt
+          fi
+
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: |
+            build/coverage/
+            build/clover.xml
+            build/coverage.txt
+          retention-days: 30
