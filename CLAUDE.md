@@ -29,6 +29,7 @@ vendor/bin/phpunit --testsuite unit --filter <test function, class, or directory
 composer coverage            # text summary
 composer coverage-html       # HTML report in build/coverage
 composer coverage -- --filter <class> --coverage-filter <path>   # narrow a run
+composer coverage -- --path-coverage --filter <TestClass> --coverage-filter <path>   # branch/path coverage, narrowed
 
 # javascript commands
 composer jsfix           # js code style fix
@@ -52,6 +53,18 @@ Run these four checks **in order** — all must pass:
 4. `vendor/bin/phpunit --testsuite unit`
 
 > **Never add or change phpunit command options** when unit testing — only run project unit tests as specified above. When testing a single class or cluster, only run tests for that class/directory. Measuring coverage is the exception: use the `composer coverage` scripts, narrowing a run with `--filter` and `--coverage-filter`.
+
+### Branch (path) coverage, narrowed
+
+Line coverage misses untaken branches. `--path-coverage` (Xdebug) reports each branch and path of a method, which is the list of what a test still has to exercise. A full-suite path-coverage run takes about an hour; narrowing it to the test classes that cover the target reproduces the same branch list for that target in seconds:
+
+```bash
+composer coverage -- --path-coverage --filter 'TComponentTest|TApplicationTest' --coverage-filter framework/TComponent.php
+```
+
+- `--filter` takes a regex over test class, method, or directory names; list every test class that touches the target, or the report shows branches those omitted tests would have covered.
+- `--coverage-filter` restricts the report to the target source file or directory, so the output is only the branches that matter.
+- `composer coverage-html` accepts the same options; the HTML report lists branches and paths per method under `build/coverage`.
 
 ## Architecture
 
