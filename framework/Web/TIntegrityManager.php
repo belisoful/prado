@@ -92,7 +92,6 @@ use Prado\Xml\TXmlElement;
  *
  * @author Brad Anderson <belisoful@icloud.com>
  * @since 4.4.0
- * @todo Stylesheet Integrity
  */
 class TIntegrityManager extends TModule
 {
